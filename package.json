@@ -1,0 +1,22 @@
+{
+  "name": "taim",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Tomhel Academic Information Manager",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@taim/api",
+    "dev:web": "npm run dev --workspace=@taim/web",
+    "dev:api": "npm run dev --workspace=@taim/api",
+    "build": "npm run build --workspaces --if-present",
+    "db:generate": "npm run db:generate --workspace=@taim/api",
+    "db:migrate": "npm run db:migrate --workspace=@taim/api",
+    "db:push": "npm run db:push --workspace=@taim/api",
+    "db:seed": "npm run db:seed --workspace=@taim/api"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
