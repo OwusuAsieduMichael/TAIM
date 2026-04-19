@@ -1,5 +1,11 @@
 import { apiFetch } from '@/lib/api';
 
+export type StudentGuardian = {
+  name: string;
+  phone: string | null;
+  relation: string;
+};
+
 export type MeResponse = {
   id: string;
   fullName: string;
@@ -7,7 +13,30 @@ export type MeResponse = {
   schoolId: string | null;
   email: string | null;
   phone: string | null;
-  student: { id: string; admissionNumber: string; classId: string | null } | null;
+  accountStatus?: string;
+  /** ISO timestamp — profile or account last updated on server. */
+  lastActivityAt?: string | null;
+  student: {
+    id: string;
+    admissionNumber: string;
+    classId: string | null;
+    schoolName?: string;
+    schoolSlug?: string;
+    className?: string | null;
+    classLevel?: string | null;
+    attendanceToday?: string | null;
+    attendanceRecent?: { date: string; status: string }[];
+    /** HTTPS URL to passport-style portrait (uploaded by school). */
+    passportPhotoUrl?: string | null;
+    firstName?: string;
+    lastName?: string;
+    gender?: string | null;
+    /** ISO date `YYYY-MM-DD`. */
+    dateOfBirth?: string | null;
+    academicYearName?: string | null;
+    currentTermName?: string | null;
+    guardians?: StudentGuardian[];
+  } | null;
 };
 
 export async function loginAdmin(email: string, password: string, token?: string | null) {

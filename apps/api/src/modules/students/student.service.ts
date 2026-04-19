@@ -93,6 +93,7 @@ export async function updateStudent(
     dateOfBirth?: string | null;
     gender?: string | null;
     classId?: string | null;
+    passportPhotoUrl?: string | null;
   },
 ) {
   const student = await prisma.student.findFirst({ where: { id: studentId, schoolId } });
@@ -107,6 +108,7 @@ export async function updateStudent(
   }
   if (patch.gender !== undefined) data.gender = patch.gender;
   if (patch.classId !== undefined) data.classId = patch.classId;
+  if (patch.passportPhotoUrl !== undefined) data.passportPhotoUrl = patch.passportPhotoUrl;
   if (patch.firstName !== undefined || patch.lastName !== undefined) {
     const fn = (patch.firstName ?? student.firstName) as string;
     const ln = (patch.lastName ?? student.lastName) as string;

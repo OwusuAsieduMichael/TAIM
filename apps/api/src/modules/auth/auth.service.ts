@@ -146,14 +146,127 @@ export async function verifyOtp(input: {
   };
 }
 
+function startOfLocalDay(): Date {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/** Term whose date range includes today, if any. */
+function pickCurrentTermName(terms: { name: string; startsOn: Date; endsOn: Date }[]): string | null {
+  if (!terms.length) return null;
+  const now = Date.now();
+  for (const t of terms) {
+    const a = t.startsOn.getTime();
+    const b = t.endsOn.getTime();
+    if (now >= a && now <= b) return t.name;
+  }
+  return null;
+}
+
 export async function getProfile(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { studentProfile: true },
+    include: {
+      studentProfile: {
+        include: {
+          school: { select: { id: true, name: true, slug: true } },
+          class: {
+            select: {
+              id: true,
+              name: true,
+              level: true,
+              academicYear: {
+                select: {
+                  id: true,
+                  name: true,
+                  terms: {
+                    select: { name: true, startsOn: true, endsOn: true, order: true },
+                    orderBy: { order: 'asc' },
+                  },
+                },
+              },
+            },
+          },
+          parents: {
+            include: {
+              parent: { select: { fullName: true, phone: true } },
+            },
+          },
+        },
+      },
+    },
   });
   if (!user) {
     throw new HttpError(404, 'User not found');
   }
+
+  let studentOut: {
+    id: string;
+    admissionNumber: string;
+    classId: string | null;
+    schoolName: string;
+    schoolSlug: string;
+    className: string | null;
+    classLevel: string | null;
+    attendanceToday: string | null;
+    attendanceRecent: { date: string; status: string }[];
+    passportPhotoUrl: string | null;
+    firstName: string;
+    lastName: string;
+    gender: string | null;
+    dateOfBirth: string | null;
+    academicYearName: string | null;
+    currentTermName: string | null;
+    guardians: { name: string; phone: string | null; relation: string }[];
+  } | null = null;
+
+  if (user.studentProfile) {
+    const sp = user.studentProfile;
+    const day = startOfLocalDay();
+    const next = new Date(day);
+    next.setDate(next.getDate() + 1);
+    const todayRow = await prisma.attendance.findFirst({
+      where: {
+        studentId: sp.id,
+        date: { gte: day, lt: next },
+      },
+    });
+    const recent = await prisma.attendance.findMany({
+      where: { studentId: sp.id },
+      orderBy: { date: 'desc' },
+      take: 14,
+      select: { date: true, status: true },
+    });
+    const terms = sp.class?.academicYear?.terms ?? [];
+    studentOut = {
+      id: sp.id,
+      admissionNumber: sp.admissionNumber,
+      classId: sp.classId,
+      schoolName: sp.school.name,
+      schoolSlug: sp.school.slug,
+      className: sp.class?.name ?? null,
+      classLevel: sp.class?.level ?? null,
+      attendanceToday: todayRow?.status ?? null,
+      attendanceRecent: recent.map((r) => ({
+        date: r.date.toISOString().slice(0, 10),
+        status: r.status,
+      })),
+      passportPhotoUrl: sp.passportPhotoUrl ?? null,
+      firstName: sp.firstName,
+      lastName: sp.lastName,
+      gender: sp.gender ?? null,
+      dateOfBirth: sp.dateOfBirth ? sp.dateOfBirth.toISOString().slice(0, 10) : null,
+      academicYearName: sp.class?.academicYear?.name ?? null,
+      currentTermName: pickCurrentTermName(terms),
+      guardians: sp.parents.map((row) => ({
+        name: row.parent.fullName,
+        phone: row.parent.phone,
+        relation: row.relation,
+      })),
+    };
+  }
+
   return {
     id: user.id,
     fullName: user.fullName,
@@ -161,13 +274,9 @@ export async function getProfile(userId: string) {
     schoolId: user.schoolId,
     email: user.email,
     phone: user.phone,
-    student: user.studentProfile
-      ? {
-          id: user.studentProfile.id,
-          admissionNumber: user.studentProfile.admissionNumber,
-          classId: user.studentProfile.classId,
-        }
-      : null,
+    accountStatus: user.status,
+    lastActivityAt: user.updatedAt.toISOString(),
+    student: studentOut,
   };
 }
 

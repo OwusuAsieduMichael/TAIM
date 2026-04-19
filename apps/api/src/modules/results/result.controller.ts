@@ -3,7 +3,10 @@ import type { AuthedRequest } from '../../middleware/auth.js';
 import * as svc from './result.service.js';
 
 export async function upsert(req: AuthedRequest, res: Response): Promise<void> {
-  const row = await svc.upsertResult(req.auth!.schoolId!, req.body);
+  const row = await svc.upsertResult(req.auth!.schoolId!, req.body, {
+    sub: req.auth!.sub,
+    role: req.auth!.role,
+  });
   res.json(row);
 }
 

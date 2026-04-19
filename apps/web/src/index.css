@@ -1,22 +1,594 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --radius-lg: 0.5rem;
-  --color-background: oklch(0.985 0.002 247);
-  --color-foreground: oklch(0.2 0.02 260);
+  --color-background: oklch(0.98 0.004 260);
+  --color-foreground: oklch(0.22 0.03 260);
   --color-card: oklch(1 0 0);
-  --color-muted: oklch(0.55 0.02 260);
-  --color-border: oklch(0.9 0.01 260);
-  --color-primary: oklch(0.45 0.15 260);
+  --color-muted: oklch(0.5 0.02 260);
+  --color-border: oklch(0.91 0.012 260);
+  --color-primary: oklch(0.42 0.14 264);
   --color-primary-foreground: oklch(0.99 0 0);
   --color-destructive: oklch(0.55 0.2 25);
+  --color-success: oklch(0.52 0.12 165);
+  --color-warning: oklch(0.72 0.14 65);
+  --color-sidebar: oklch(0.2 0.04 264);
+  --color-sidebar-foreground: oklch(0.96 0.01 260);
+  --color-sidebar-muted: oklch(0.72 0.02 260);
+  --color-sidebar-border: oklch(0.32 0.04 264);
 }
 
 body {
   margin: 0;
   min-height: 100dvh;
   font-family: var(--font-sans);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   background: var(--color-background);
   color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+.dark {
+  --color-background: oklch(0.17 0.022 264);
+  --color-foreground: oklch(0.96 0.012 260);
+  --color-card: oklch(0.21 0.028 264);
+  --color-muted: oklch(0.62 0.02 260);
+  --color-border: oklch(0.32 0.03 264);
+  --color-primary: oklch(0.62 0.14 264);
+  --color-primary-foreground: oklch(0.12 0.02 264);
+  --color-destructive: oklch(0.62 0.18 25);
+  --color-success: oklch(0.62 0.12 165);
+  --color-warning: oklch(0.74 0.14 65);
+  --color-sidebar: oklch(0.16 0.03 264);
+  --color-sidebar-foreground: oklch(0.95 0.01 260);
+  --color-sidebar-muted: oklch(0.58 0.02 260);
+  --color-sidebar-border: oklch(0.28 0.03 264);
+}
+
+@keyframes insight-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes portal-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-page {
+    animation: none !important;
+  }
+}
+
+.portal-page {
+  animation: portal-page-in 240ms ease-out both;
+}
+
+/* Student portal: compact density tightens main content padding */
+.student-portal-root[data-density="compact"] .mx-auto.max-w-lg,
+.student-portal-root[data-density="compact"] .mx-auto.max-w-6xl {
+  padding-top: 0.75rem !important;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+}
+
+@media (min-width: 640px) {
+  .student-portal-root[data-density="compact"] .mx-auto.max-w-lg,
+  .student-portal-root[data-density="compact"] .mx-auto.max-w-6xl {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+/* Student portal: full-viewport background image + scrims (override URL on .student-portal-root) */
+.student-portal-root {
+  --student-portal-bg-image: url("/Tomhel.jpg");
+  /* Nav rail + top header: school green (slightly richer chroma; .dark overrides) */
+  --student-rail-surface: oklch(0.945 0.044 148);
+  --student-rail-surface-glass: color-mix(in oklch, var(--student-rail-surface) 90%, transparent);
+  --student-rail-border: oklch(0.78 0.058 148);
+  --student-rail-fg: oklch(0.25 0.065 148);
+  --student-rail-muted: oklch(0.46 0.072 148);
+  --student-rail-accent: oklch(0.38 0.15 148);
+  --student-rail-accent-soft: color-mix(in oklch, var(--student-rail-accent) 18%, transparent);
+  --student-rail-hover: color-mix(in oklch, oklch(0.22 0.07 148) 11%, transparent);
+  /* Controls sitting on green glass (menu, back, avatar chip) */
+  --student-rail-chip: color-mix(in oklch, var(--student-rail-surface) 68%, white);
+  --student-rail-chip-hover: color-mix(in oklch, var(--student-rail-surface) 52%, white);
+}
+
+.dark .student-portal-root {
+  --student-rail-surface: oklch(0.24 0.052 150);
+  --student-rail-surface-glass: color-mix(in oklch, var(--student-rail-surface) 92%, transparent);
+  --student-rail-border: oklch(0.34 0.055 150);
+  --student-rail-fg: oklch(0.94 0.025 150);
+  --student-rail-muted: oklch(0.66 0.048 150);
+  --student-rail-accent: oklch(0.8 0.128 150);
+  --student-rail-accent-soft: color-mix(in oklch, var(--student-rail-accent) 18%, transparent);
+  --student-rail-hover: color-mix(in oklch, oklch(1 0 0) 11%, transparent);
+  --student-rail-chip: color-mix(in oklch, var(--student-rail-surface) 82%, white);
+  --student-rail-chip-hover: color-mix(in oklch, var(--student-rail-surface) 70%, white);
+}
+
+/* Teacher workspace (dashboard / teacher role): match student atmosphere + green rail */
+.teacher-portal-root {
+  --teacher-portal-bg-image: url("/Tomhel.jpg");
+  --teacher-rail-surface: oklch(0.945 0.044 148);
+  --teacher-rail-surface-glass: color-mix(in oklch, var(--teacher-rail-surface) 90%, transparent);
+  --teacher-rail-border: oklch(0.78 0.058 148);
+  --teacher-rail-fg: oklch(0.25 0.065 148);
+  --teacher-rail-muted: oklch(0.46 0.072 148);
+  --teacher-rail-accent: oklch(0.38 0.15 148);
+  --teacher-rail-accent-soft: color-mix(in oklch, var(--teacher-rail-accent) 18%, transparent);
+  --teacher-rail-hover: color-mix(in oklch, oklch(0.22 0.07 148) 11%, transparent);
+  --teacher-rail-chip: color-mix(in oklch, var(--teacher-rail-surface) 68%, white);
+  --teacher-rail-chip-hover: color-mix(in oklch, var(--teacher-rail-surface) 52%, white);
+}
+
+.dark .teacher-portal-root {
+  --teacher-rail-surface: oklch(0.24 0.052 150);
+  --teacher-rail-surface-glass: color-mix(in oklch, var(--teacher-rail-surface) 92%, transparent);
+  --teacher-rail-border: oklch(0.34 0.055 150);
+  --teacher-rail-fg: oklch(0.94 0.025 150);
+  --teacher-rail-muted: oklch(0.66 0.048 150);
+  --teacher-rail-accent: oklch(0.8 0.128 150);
+  --teacher-rail-accent-soft: color-mix(in oklch, var(--teacher-rail-accent) 18%, transparent);
+  --teacher-rail-hover: color-mix(in oklch, oklch(1 0 0) 11%, transparent);
+  --teacher-rail-chip: color-mix(in oklch, var(--teacher-rail-surface) 82%, white);
+  --teacher-rail-chip-hover: color-mix(in oklch, var(--teacher-rail-surface) 70%, white);
+}
+
+.teacher-portal-bg {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  print-color-adjust: exact;
+}
+
+.teacher-portal-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-background);
+  background-image:
+    radial-gradient(
+      ellipse 120% 75% at 50% -8%,
+      color-mix(in oklch, var(--color-primary) 10%, transparent) 0%,
+      transparent 55%
+    ),
+    linear-gradient(
+      168deg,
+      color-mix(in oklch, var(--color-background) 38%, transparent) 0%,
+      color-mix(in oklch, var(--color-background) 22%, transparent) 42%,
+      color-mix(in oklch, var(--color-background) 44%, transparent) 100%
+    ),
+    var(--teacher-portal-bg-image);
+  background-size: cover, cover, cover;
+  background-position: center, center, center 30%;
+  background-repeat: no-repeat;
+}
+
+.dark .teacher-portal-bg::before {
+  background-image:
+    radial-gradient(
+      ellipse 120% 70% at 50% -8%,
+      color-mix(in oklch, var(--color-primary) 14%, transparent) 0%,
+      transparent 52%
+    ),
+    linear-gradient(
+      168deg,
+      color-mix(in oklch, var(--color-background) 52%, transparent) 0%,
+      color-mix(in oklch, var(--color-background) 36%, transparent) 40%,
+      color-mix(in oklch, var(--color-background) 58%, transparent) 100%
+    ),
+    var(--teacher-portal-bg-image);
+}
+
+/* School admin: same campus atmosphere + school green rail as student / teacher */
+.admin-portal-root {
+  --admin-portal-bg-image: url("/Tomhel.jpg");
+  --admin-rail-surface: oklch(0.945 0.044 148);
+  --admin-rail-surface-glass: color-mix(in oklch, var(--admin-rail-surface) 90%, transparent);
+  --admin-rail-border: oklch(0.78 0.058 148);
+  --admin-rail-fg: oklch(0.25 0.065 148);
+  --admin-rail-muted: oklch(0.46 0.072 148);
+  --admin-rail-accent: oklch(0.38 0.15 148);
+  --admin-rail-accent-soft: color-mix(in oklch, var(--admin-rail-accent) 18%, transparent);
+  --admin-rail-hover: color-mix(in oklch, oklch(0.22 0.07 148) 11%, transparent);
+  --admin-rail-chip: color-mix(in oklch, var(--admin-rail-surface) 68%, white);
+  --admin-rail-chip-hover: color-mix(in oklch, var(--admin-rail-surface) 52%, white);
+}
+
+.dark .admin-portal-root {
+  --admin-rail-surface: oklch(0.24 0.052 150);
+  --admin-rail-surface-glass: color-mix(in oklch, var(--admin-rail-surface) 92%, transparent);
+  --admin-rail-border: oklch(0.34 0.055 150);
+  --admin-rail-fg: oklch(0.94 0.025 150);
+  --admin-rail-muted: oklch(0.66 0.048 150);
+  --admin-rail-accent: oklch(0.8 0.128 150);
+  --admin-rail-accent-soft: color-mix(in oklch, var(--admin-rail-accent) 18%, transparent);
+  --admin-rail-hover: color-mix(in oklch, oklch(1 0 0) 11%, transparent);
+  --admin-rail-chip: color-mix(in oklch, var(--admin-rail-surface) 82%, white);
+  --admin-rail-chip-hover: color-mix(in oklch, var(--admin-rail-surface) 70%, white);
+}
+
+.admin-portal-bg {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  print-color-adjust: exact;
+}
+
+.admin-portal-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-background);
+  background-image:
+    radial-gradient(
+      ellipse 120% 75% at 50% -8%,
+      color-mix(in oklch, var(--color-primary) 10%, transparent) 0%,
+      transparent 55%
+    ),
+    linear-gradient(
+      168deg,
+      color-mix(in oklch, var(--color-background) 38%, transparent) 0%,
+      color-mix(in oklch, var(--color-background) 22%, transparent) 42%,
+      color-mix(in oklch, var(--color-background) 44%, transparent) 100%
+    ),
+    var(--admin-portal-bg-image);
+  background-size: cover, cover, cover;
+  background-position: center, center, center 30%;
+  background-repeat: no-repeat;
+}
+
+.dark .admin-portal-bg::before {
+  background-image:
+    radial-gradient(
+      ellipse 120% 70% at 50% -8%,
+      color-mix(in oklch, var(--color-primary) 14%, transparent) 0%,
+      transparent 52%
+    ),
+    linear-gradient(
+      168deg,
+      color-mix(in oklch, var(--color-background) 52%, transparent) 0%,
+      color-mix(in oklch, var(--color-background) 36%, transparent) 40%,
+      color-mix(in oklch, var(--color-background) 58%, transparent) 100%
+    ),
+    var(--admin-portal-bg-image);
+}
+
+/* Parent / guardian portal — same campus image + school green rail as student & teacher */
+.parent-portal-root {
+  --parent-portal-bg-image: url("/Tomhel.jpg");
+  --parent-rail-surface: oklch(0.945 0.044 148);
+  --parent-rail-surface-glass: color-mix(in oklch, var(--parent-rail-surface) 90%, transparent);
+  --parent-rail-border: oklch(0.78 0.058 148);
+  --parent-rail-fg: oklch(0.25 0.065 148);
+  --parent-rail-muted: oklch(0.46 0.072 148);
+  --parent-rail-accent: oklch(0.38 0.15 148);
+  --parent-rail-accent-soft: color-mix(in oklch, var(--parent-rail-accent) 18%, transparent);
+  --parent-rail-hover: color-mix(in oklch, oklch(0.22 0.07 148) 11%, transparent);
+  --parent-rail-chip: color-mix(in oklch, var(--parent-rail-surface) 68%, white);
+  --parent-rail-chip-hover: color-mix(in oklch, var(--parent-rail-surface) 52%, white);
+}
+
+.dark .parent-portal-root {
+  --parent-rail-surface: oklch(0.24 0.052 150);
+  --parent-rail-surface-glass: color-mix(in oklch, var(--parent-rail-surface) 92%, transparent);
+  --parent-rail-border: oklch(0.34 0.055 150);
+  --parent-rail-fg: oklch(0.94 0.025 150);
+  --parent-rail-muted: oklch(0.66 0.048 150);
+  --parent-rail-accent: oklch(0.8 0.128 150);
+  --parent-rail-accent-soft: color-mix(in oklch, var(--parent-rail-accent) 18%, transparent);
+  --parent-rail-hover: color-mix(in oklch, oklch(1 0 0) 11%, transparent);
+  --parent-rail-chip: color-mix(in oklch, var(--parent-rail-surface) 82%, white);
+  --parent-rail-chip-hover: color-mix(in oklch, var(--parent-rail-surface) 70%, white);
+}
+
+.parent-portal-bg {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  print-color-adjust: exact;
+}
+
+.parent-portal-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-background);
+  background-image:
+    radial-gradient(
+      ellipse 120% 75% at 50% -8%,
+      color-mix(in oklch, var(--color-primary) 10%, transparent) 0%,
+      transparent 55%
+    ),
+    linear-gradient(
+      168deg,
+      color-mix(in oklch, var(--color-background) 38%, transparent) 0%,
+      color-mix(in oklch, var(--color-background) 22%, transparent) 42%,
+      color-mix(in oklch, var(--color-background) 44%, transparent) 100%
+    ),
+    var(--parent-portal-bg-image);
+  background-size: cover, cover, cover;
+  background-position: center, center, center 30%;
+  background-repeat: no-repeat;
+}
+
+.dark .parent-portal-bg::before {
+  background-image:
+    radial-gradient(
+      ellipse 120% 70% at 50% -8%,
+      color-mix(in oklch, var(--color-primary) 14%, transparent) 0%,
+      transparent 52%
+    ),
+    linear-gradient(
+      168deg,
+      color-mix(in oklch, var(--color-background) 52%, transparent) 0%,
+      color-mix(in oklch, var(--color-background) 36%, transparent) 40%,
+      color-mix(in oklch, var(--color-background) 58%, transparent) 100%
+    ),
+    var(--parent-portal-bg-image);
+}
+
+.parent-nav-well {
+  transition:
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.parent-nav-well:hover {
+  transform: translateY(-1px);
+}
+
+.parent-nav-well:active {
+  transform: translateY(0) scale(0.99);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parent-nav-well {
+    transition-property: background-color, color, border-color;
+  }
+
+  .parent-nav-well:hover,
+  .parent-nav-well:active {
+    transform: none;
+  }
+}
+
+.admin-nav-well {
+  transition:
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.admin-nav-well:hover {
+  transform: translateY(-1px);
+}
+
+.admin-nav-well:active {
+  transform: translateY(0) scale(0.99);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-nav-well {
+    transition-property: background-color, color, border-color;
+  }
+
+  .admin-nav-well:hover,
+  .admin-nav-well:active {
+    transform: none;
+  }
+}
+
+/* Student portal: subtle lift + soft depth (rail, header, service tiles, toolbars, etc.) */
+.student-portal-root .student-interactive-well,
+.teacher-portal-root .student-interactive-well,
+.admin-portal-root .student-interactive-well,
+.parent-portal-root .student-interactive-well {
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.student-portal-root .student-interactive-well:hover,
+.teacher-portal-root .student-interactive-well:hover,
+.admin-portal-root .student-interactive-well:hover,
+.parent-portal-root .student-interactive-well:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 color-mix(in oklch, var(--color-foreground) 8%, transparent),
+    0 10px 22px -8px color-mix(in oklch, var(--color-foreground) 14%, transparent);
+}
+
+.student-portal-root .student-interactive-well:active,
+.teacher-portal-root .student-interactive-well:active,
+.admin-portal-root .student-interactive-well:active,
+.parent-portal-root .student-interactive-well:active {
+  transform: translateY(0) scale(0.985);
+  box-shadow: none;
+  transition-duration: 0.09s;
+}
+
+.student-portal-root button.student-interactive-well:disabled,
+.student-portal-root button.student-interactive-well[disabled],
+.teacher-portal-root button.student-interactive-well:disabled,
+.teacher-portal-root button.student-interactive-well[disabled],
+.admin-portal-root button.student-interactive-well:disabled,
+.admin-portal-root button.student-interactive-well[disabled],
+.parent-portal-root button.student-interactive-well:disabled,
+.parent-portal-root button.student-interactive-well[disabled] {
+  transform: none;
+  box-shadow: none;
+}
+
+.student-portal-root button.student-interactive-well:disabled:hover,
+.student-portal-root button.student-interactive-well[disabled]:hover,
+.teacher-portal-root button.student-interactive-well:disabled:hover,
+.teacher-portal-root button.student-interactive-well[disabled]:hover,
+.admin-portal-root button.student-interactive-well:disabled:hover,
+.admin-portal-root button.student-interactive-well[disabled]:hover,
+.parent-portal-root button.student-interactive-well:disabled:hover,
+.parent-portal-root button.student-interactive-well[disabled]:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .student-portal-root .student-interactive-well,
+  .teacher-portal-root .student-interactive-well,
+  .admin-portal-root .student-interactive-well,
+  .parent-portal-root .student-interactive-well {
+    transition-property: background-color, color, border-color, opacity;
+    transition-duration: 0.15s;
+  }
+
+  .student-portal-root .student-interactive-well:hover,
+  .student-portal-root .student-interactive-well:active,
+  .teacher-portal-root .student-interactive-well:hover,
+  .teacher-portal-root .student-interactive-well:active,
+  .admin-portal-root .student-interactive-well:hover,
+  .admin-portal-root .student-interactive-well:active,
+  .parent-portal-root .student-interactive-well:hover,
+  .parent-portal-root .student-interactive-well:active {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.student-portal-bg {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  print-color-adjust: exact;
+}
+
+.student-portal-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-background);
+  background-image:
+    radial-gradient(
+      ellipse 120% 75% at 50% -8%,
+      color-mix(in oklch, var(--color-primary) 10%, transparent) 0%,
+      transparent 55%
+    ),
+    linear-gradient(
+      168deg,
+      color-mix(in oklch, var(--color-background) 38%, transparent) 0%,
+      color-mix(in oklch, var(--color-background) 22%, transparent) 42%,
+      color-mix(in oklch, var(--color-background) 44%, transparent) 100%
+    ),
+    var(--student-portal-bg-image);
+  background-size: cover, cover, cover;
+  background-position: center, center, center 30%;
+  background-repeat: no-repeat;
+}
+
+.dark .student-portal-bg::before {
+  background-image:
+    radial-gradient(
+      ellipse 120% 70% at 50% -8%,
+      color-mix(in oklch, var(--color-primary) 14%, transparent) 0%,
+      transparent 52%
+    ),
+    linear-gradient(
+      168deg,
+      color-mix(in oklch, var(--color-background) 52%, transparent) 0%,
+      color-mix(in oklch, var(--color-background) 36%, transparent) 40%,
+      color-mix(in oklch, var(--color-background) 58%, transparent) 100%
+    ),
+    var(--student-portal-bg-image);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .student-portal-bg::before,
+  .teacher-portal-bg::before,
+  .admin-portal-bg::before,
+  .parent-portal-bg::before {
+    background-image: none;
+    background-color: var(--color-background);
+  }
+
+  .student-header-blur,
+  .student-nav-rail,
+  .teacher-header-blur,
+  .teacher-nav-rail,
+  .admin-header-blur,
+  .admin-nav-rail,
+  .parent-header-blur,
+  .parent-nav-rail {
+    backdrop-filter: none !important;
+  }
+}
+
+@media print {
+  .student-portal-bg,
+  .teacher-portal-bg,
+  .admin-portal-bg,
+  .parent-portal-bg {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
 }

@@ -91,6 +91,8 @@ model Student {
   gender          String?
   classId         String?
   class           Class?    @relation(fields: [classId], references: [id])
+  /// Public HTTPS URL to passport-style portrait / photo (set by school admin).
+  passportPhotoUrl String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

@@ -1,3 +1,4 @@
+import type { Role } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
 import { computeResult } from '../../lib/grades.js';
 import { HttpError } from '../../middleware/errorHandler.js';
@@ -13,7 +14,21 @@ export async function upsertResult(
     caScore: number;
     examScore: number;
   },
+  auth?: { sub: string; role: Role },
 ) {
+  if (auth?.role === 'TEACHER') {
+    const allowed = await prisma.teacherSubject.findFirst({
+      where: {
+        teacherId: auth.sub,
+        classId: input.classId,
+        subjectId: input.subjectId,
+      },
+    });
+    if (!allowed) {
+      throw new HttpError(403, 'You are not assigned to teach this subject for this class');
+    }
+  }
+
   const [student, subject, term, klass] = await Promise.all([
     prisma.student.findFirst({ where: { id: input.studentId, schoolId } }),
     prisma.subject.findFirst({ where: { id: input.subjectId, schoolId } }),
@@ -24,6 +39,9 @@ export async function upsertResult(
   ]);
   if (!student || !subject || !term || !klass) {
     throw new HttpError(400, 'Invalid student, subject, term, or class');
+  }
+  if (auth?.role === 'TEACHER' && student.classId !== input.classId) {
+    throw new HttpError(400, 'Student is not in this class');
   }
   const { finalScore, grade, remark } = computeResult(input.caScore, input.examScore);
   return prisma.result.upsert({

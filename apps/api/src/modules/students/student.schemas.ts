@@ -1,5 +1,12 @@
 import { z } from 'zod';
 
+const optionalHttpsUrl = z
+  .union([z.string().url().max(2048), z.null()])
+  .optional()
+  .refine((v) => v == null || /^https:\/\//i.test(v), {
+    message: 'URL must use https',
+  });
+
 export const createStudentSchema = z.object({
   admissionNumber: z.string().min(1),
   firstName: z.string().min(1),
@@ -16,6 +23,7 @@ export const updateStudentSchema = z.object({
   dateOfBirth: z.string().datetime().nullable().optional(),
   gender: z.string().max(20).nullable().optional(),
   classId: z.string().cuid().nullable().optional(),
+  passportPhotoUrl: optionalHttpsUrl,
 });
 
 export const resetPinSchema = z.object({

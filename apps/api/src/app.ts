@@ -13,6 +13,7 @@ import { resultRouter } from './modules/results/result.routes.js';
 import { schoolRouter } from './modules/schools/school.routes.js';
 import { studentRouter } from './modules/students/student.routes.js';
 import { subjectRouter } from './modules/subjects/subject.routes.js';
+import { teacherPortalRouter } from './modules/teacher-portal/teacher-portal.routes.js';
 import { teacherSubjectRouter } from './modules/teacher-subjects/teacher-subject.routes.js';
 import { setupSwagger } from './swagger.js';
 
@@ -51,6 +52,7 @@ export function createApp() {
   v1.use('/classes', classRouter);
   v1.use('/subjects', subjectRouter);
   v1.use('/teacher-subjects', teacherSubjectRouter);
+  v1.use('/teacher', teacherPortalRouter);
   v1.use('/attendance', attendanceRouter);
   v1.use('/results', resultRouter);
   v1.use('/notifications', notificationRouter);

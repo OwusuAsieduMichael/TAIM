@@ -20,7 +20,7 @@ resultRouter.get(
 resultRouter.post(
   '/upsert',
   requireSchoolScope,
-  requireRoles('ADMIN'),
+  requireRoles('ADMIN', 'TEACHER'),
   validateBody(upsertResultSchema),
   asyncHandler((req, res) => ctrl.upsert(req as AuthedRequest, res)),
 );
