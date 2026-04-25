@@ -9,6 +9,7 @@ import { attendanceRouter } from './modules/attendance/attendance.routes.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { classRouter } from './modules/classes/class.routes.js';
 import { notificationRouter } from './modules/notifications/notification.routes.js';
+import { reportCardRouter } from './modules/report-cards/report-card.routes.js';
 import { resultRouter } from './modules/results/result.routes.js';
 import { schoolRouter } from './modules/schools/school.routes.js';
 import { studentRouter } from './modules/students/student.routes.js';
@@ -55,6 +56,7 @@ export function createApp() {
   v1.use('/teacher', teacherPortalRouter);
   v1.use('/attendance', attendanceRouter);
   v1.use('/results', resultRouter);
+  v1.use('/report-cards', reportCardRouter);
   v1.use('/notifications', notificationRouter);
 
   app.use('/api/v1', v1);

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { requireAuth, type AuthedRequest } from '../../middleware/auth.js';
+import { teacherWorkforceGate } from '../../middleware/teacherWorkforceGate.js';
 import { requireRoles, requireSchoolScope } from '../../middleware/rbac.js';
 import { validateBody } from '../../middleware/validate.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
@@ -21,6 +22,7 @@ resultRouter.post(
   '/upsert',
   requireSchoolScope,
   requireRoles('ADMIN', 'TEACHER'),
+  teacherWorkforceGate,
   validateBody(upsertResultSchema),
   asyncHandler((req, res) => ctrl.upsert(req as AuthedRequest, res)),
 );

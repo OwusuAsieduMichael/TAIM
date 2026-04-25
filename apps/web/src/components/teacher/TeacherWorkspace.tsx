@@ -7,6 +7,7 @@ import type { TeacherSection, TeacherWorkspaceAssignment, TeacherWorkspaceClass 
 import { localDateKey } from '@/lib/teacherLocalDate';
 import { isDevMockToken } from '@/lib/skipRoleAuth';
 import { useAuthStore } from '@/store/authStore';
+import { TeacherEveningSignOutBanner } from './TeacherEveningSignOutBanner';
 import { TeacherAttendancePanel } from './TeacherAttendancePanel';
 import { TeacherContextBar } from './TeacherContextBar';
 import { TeacherReportsView } from './TeacherReportsView';
@@ -281,6 +282,8 @@ export function TeacherWorkspace({ section }: Props) {
       <TeacherToastViewport />
 
       <PageHeader title={meta.title} description={meta.description} />
+
+      {!mock ? <TeacherEveningSignOutBanner /> : null}
 
       {mock ? (
         <p className="mb-6 rounded-xl border border-sky-500/20 bg-sky-500/10 px-4 py-3 text-sm text-sky-950 dark:text-sky-100">

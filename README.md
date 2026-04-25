@@ -10,6 +10,10 @@ Monorepo layout:
 - Node.js 20+
 - A [Supabase](https://supabase.com) project (Postgres), or local PostgreSQL for development
 
+## Extended features (teacher workforce and report cards)
+
+Teacher workforce SMS OTP (morning sign-in and evening sign-out), report card submissions and admin approval, API route summary, Supabase **`DIRECT_URL`** options when **`db.*:5432`** fails, and the Windows **`scripts/stop-dev-ports.ps1`** helper for Prisma **`EPERM`** are documented in **[docs/TEACHER_WORKFORCE_REPORT_CARDS.md](docs/TEACHER_WORKFORCE_REPORT_CARDS.md)**.
+
 ## Supabase database
 
 1. Create a project at [supabase.com](https://supabase.com).

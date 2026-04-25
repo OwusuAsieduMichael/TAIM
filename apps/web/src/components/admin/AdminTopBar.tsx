@@ -1,18 +1,29 @@
-import { Bell, ChevronDown, LogOut, Menu, Search, Settings } from 'lucide-react';
+import { Bell, ChevronDown, LogOut, Menu, Search, Settings, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { PortalBackButton } from '@/components/layout/PortalBackButton';
 import { Button } from '@/components/ui/button';
+import { PORTAL_DASHBOARD_HOME } from '@/lib/portalRoutes';
 import { cn } from '@/lib/utils';
 
 type Props = {
   contextLine: string;
   roleLabel: string;
-  onOpenMobileNav?: () => void;
+  /** When set with `onToggleMobileNav`, the control toggles the rail and shows Menu vs close icon. */
+  mobileNavOpen?: boolean;
+  onToggleMobileNav?: () => void;
   showMobileMenu?: boolean;
   onSignOut: () => void;
 };
 
-export function AdminTopBar({ contextLine, roleLabel, onOpenMobileNav, showMobileMenu, onSignOut }: Props) {
+export function AdminTopBar({
+  contextLine,
+  roleLabel,
+  mobileNavOpen = false,
+  onToggleMobileNav,
+  showMobileMenu,
+  onSignOut,
+}: Props) {
   const [q, setQ] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -30,18 +41,33 @@ export function AdminTopBar({ contextLine, roleLabel, onOpenMobileNav, showMobil
   return (
     <div className="flex min-h-14 shrink-0 flex-col bg-transparent lg:flex-row lg:items-center lg:gap-4 lg:px-6 lg:py-2">
       <div className="flex items-center gap-2 px-3 py-2 lg:hidden">
-        {showMobileMenu ? (
+        {showMobileMenu && onToggleMobileNav ? (
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="student-interactive-well h-10 w-10 shrink-0 border-[var(--admin-rail-border)] bg-[var(--admin-rail-chip)] p-0 text-[var(--admin-rail-fg)] hover:bg-[var(--admin-rail-chip-hover)]"
-            aria-label="Open menu"
-            onClick={onOpenMobileNav}
+            className={cn(
+              'student-interactive-well h-10 w-10 shrink-0 border p-0 transition-[color,background-color,border-color,box-shadow,transform] duration-200 ease-out',
+              'motion-reduce:transition-none',
+              'active:scale-[0.96] motion-reduce:active:scale-100',
+              'focus-visible:ring-2 focus-visible:ring-[var(--admin-rail-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--admin-rail-surface)]',
+              mobileNavOpen
+                ? 'border-[color-mix(in_oklch,var(--admin-rail-accent)_38%,var(--admin-rail-border))] bg-[var(--admin-rail-accent-soft)] text-[var(--admin-rail-accent)] shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--admin-rail-accent)_22%,transparent)]'
+                : 'border-[var(--admin-rail-border)] bg-[var(--admin-rail-chip)] text-[var(--admin-rail-fg)] hover:bg-[var(--admin-rail-chip-hover)]',
+            )}
+            aria-label={mobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={mobileNavOpen}
+            aria-controls="admin-mobile-nav"
+            onClick={onToggleMobileNav}
           >
-            <Menu className="h-5 w-5" strokeWidth={2} />
+            {mobileNavOpen ? (
+              <X className="h-5 w-5" strokeWidth={2} aria-hidden />
+            ) : (
+              <Menu className="h-5 w-5" strokeWidth={2} aria-hidden />
+            )}
           </Button>
         ) : null}
+        <PortalBackButton rail="admin" fallbackPath={PORTAL_DASHBOARD_HOME} className="shrink-0 lg:hidden" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-[var(--admin-rail-muted)]">Context</p>
           <p className="truncate text-sm font-semibold text-[var(--admin-rail-fg)]">{contextLine || '—'}</p>
@@ -49,6 +75,7 @@ export function AdminTopBar({ contextLine, roleLabel, onOpenMobileNav, showMobil
       </div>
 
       <div className="hidden min-w-0 flex-1 items-center gap-3 lg:flex">
+        <PortalBackButton rail="admin" fallbackPath={PORTAL_DASHBOARD_HOME} className="shrink-0" />
         <label className="relative max-w-md flex-1">
           <span className="sr-only">Global search</span>
           <Search

@@ -72,8 +72,8 @@ async function main() {
   const password = await bcrypt.hash('Admin123!', 10);
   const school = await prisma.school.upsert({
     where: { slug: 'demo-school' },
-    update: { name: 'Tomhel Preparatory/JHS' },
-    create: { name: 'Tomhel Preparatory/JHS', slug: 'demo-school' },
+    update: { name: 'Tomhel Preparatory/JHS', timezone: 'Africa/Accra' },
+    create: { name: 'Tomhel Preparatory/JHS', slug: 'demo-school', timezone: 'Africa/Accra' },
   });
 
   await prisma.user.upsert({

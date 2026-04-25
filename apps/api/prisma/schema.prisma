@@ -39,17 +39,21 @@ model School {
   id        String   @id @default(cuid())
   name      String
   slug      String   @unique
+  /// IANA timezone for school calendar, OTP windows, and attendance dates (e.g. Africa/Accra).
+  timezone  String   @default("UTC")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users         User[]
-  students      Student[]
-  classes       Class[]
-  subjects      Subject[]
-  academicYears AcademicYear[]
-  notifications Notification[]
-  otpCodes      OtpCode[]
-  auditLogs     AuditLog[]
+  users                  User[]
+  students               Student[]
+  classes                Class[]
+  subjects               Subject[]
+  academicYears          AcademicYear[]
+  notifications          Notification[]
+  otpCodes               OtpCode[]
+  auditLogs              AuditLog[]
+  teacherWorkforceDays   TeacherWorkforceDay[]
+  reportCardSubmissions  ReportCardSubmission[]
 }
 
 model User {
@@ -71,6 +75,10 @@ model User {
   notifications   Notification[]
   auditLogs       AuditLog[]       @relation("AuditActor")
   attendanceMarks Attendance[]     @relation("AttendanceMarker")
+  otpCodesForUser   OtpCode[]        @relation("OtpForUser")
+  teacherWorkforceDays TeacherWorkforceDay[] @relation("TeacherWorkforce")
+  reportCardsSubmitted ReportCardSubmission[] @relation("ReportCardTeacher")
+  reportCardsReviewed  ReportCardSubmission[] @relation("ReportCardReviewer")
 
   @@unique([schoolId, email])
   @@unique([schoolId, phone])
@@ -138,6 +146,7 @@ model Term {
   endsOn         DateTime
   results        Result[]
   assessments    Assessment[]
+  reportCardSubmissions ReportCardSubmission[]
 
   @@unique([academicYearId, order])
 }
@@ -154,7 +163,8 @@ model Class {
   teacherSubjects TeacherSubject[]
   assessments    Assessment[]
   results        Result[]
-  attendance     Attendance[]
+  attendance              Attendance[]
+  reportCardSubmissions     ReportCardSubmission[]
 
   @@unique([schoolId, name])
 }
@@ -258,6 +268,8 @@ model OtpCode {
   id         String    @id @default(cuid())
   schoolId   String?
   school     School?   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?     @relation("OtpForUser", fields: [userId], references: [id], onDelete: Cascade)
   phone      String
   purpose    String
   codeHash   String
@@ -267,6 +279,59 @@ model OtpCode {
   createdAt  DateTime  @default(now())
 
   @@index([phone, purpose, consumedAt])
+  @@index([userId, purpose, consumedAt])
+}
+
+/// Teacher workforce (sign-in / sign-out) for a school calendar day in `School.timezone`.
+model TeacherWorkforceDay {
+  id                String    @id @default(cuid())
+  teacherId         String
+  teacher           User      @relation("TeacherWorkforce", fields: [teacherId], references: [id], onDelete: Cascade)
+  schoolId          String
+  school            School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  localDate         String
+  morningIssuedAt   DateTime?
+  signInAt          DateTime?
+  signInLate        Boolean   @default(false)
+  eveningIssuedAt   DateTime?
+  eveningDeadlineAt DateTime?
+  signOutAt         DateTime?
+  signOutLate       Boolean   @default(false)
+  forcedLogoutAt    DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([teacherId, localDate])
+  @@index([schoolId, localDate])
+}
+
+enum ReportCardSubmissionStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+}
+
+/// Exam / term report card batch submitted by a teacher for admin approval before publish.
+model ReportCardSubmission {
+  id          String                     @id @default(cuid())
+  schoolId    String
+  school      School                     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  teacherId   String
+  teacher     User                       @relation("ReportCardTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  termId      String
+  term        Term                       @relation(fields: [termId], references: [id], onDelete: Cascade)
+  classId     String
+  class       Class                      @relation(fields: [classId], references: [id], onDelete: Cascade)
+  status      ReportCardSubmissionStatus @default(PENDING_APPROVAL)
+  submittedAt DateTime                   @default(now())
+  reviewedAt  DateTime?
+  reviewerId  String?
+  reviewer    User?                      @relation("ReportCardReviewer", fields: [reviewerId], references: [id])
+  note        String?
+
+  @@index([schoolId, termId, classId, status])
+  @@index([teacherId, status])
 }
 
 model AuditLog {

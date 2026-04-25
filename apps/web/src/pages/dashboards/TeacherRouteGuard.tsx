@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { TeacherWorkspace } from '@/components/teacher/TeacherWorkspace';
+import { TeacherWorkforceShell } from '@/components/teacher/TeacherWorkforceShell';
 import type { TeacherSection } from '@/features/teacher/types';
 import { useAuthStore } from '@/store/authStore';
 
@@ -10,5 +10,5 @@ export function TeacherRouteGuard({ section }: Props) {
   if (role !== 'TEACHER') {
     return <Navigate to="/app/dashboard/overview" replace />;
   }
-  return <TeacherWorkspace section={section} />;
+  return <TeacherWorkforceShell section={section} />;
 }

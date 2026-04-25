@@ -4,7 +4,7 @@ import {
   BarChart3,
   BookOpenCheck,
   ChevronLeft,
-  ChevronRight,
+  ChevronsRight,
   ClipboardCheck,
   LayoutDashboard,
   LogOut,
@@ -13,11 +13,13 @@ import {
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AdminSidebarNav } from '@/components/admin/AdminSidebarNav';
 import { AdminTopBar } from '@/components/admin/AdminTopBar';
+import { PortalBackButton } from '@/components/layout/PortalBackButton';
 import { railSettingsHeadingClass, railSettingsPillClass } from '@/components/layout/railSettingsPills';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { SchoolLogoFigure } from '@/components/SchoolLogoFigure';
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api';
+import { PORTAL_DASHBOARD_HOME, PORTAL_TEACHER_HOME } from '@/lib/portalRoutes';
 import { cn } from '@/lib/utils';
 import { isDevMockToken, SEED_DEMO } from '@/lib/skipRoleAuth';
 import { useAuthStore } from '@/store/authStore';
@@ -119,6 +121,40 @@ export function DashboardLayout() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!isAdmin) return;
+    setAdminMobileOpen(false);
+  }, [pathname, isAdmin]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const clearIfDesktop = () => {
+      if (mq.matches) setAdminMobileOpen(false);
+    };
+    clearIfDesktop();
+    mq.addEventListener('change', clearIfDesktop);
+    return () => mq.removeEventListener('change', clearIfDesktop);
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (!isAdmin || !adminMobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setAdminMobileOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isAdmin, adminMobileOpen]);
+
+  useEffect(() => {
+    if (!isAdmin || !adminMobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isAdmin, adminMobileOpen]);
+
   function toggleAdminNavCollapsed() {
     setAdminNavCollapsed((c) => {
       const next = !c;
@@ -172,16 +208,24 @@ export function DashboardLayout() {
       {isAdmin ? <div className="admin-portal-bg print:hidden" aria-hidden /> : null}
       {isParent ? <div className="parent-portal-bg print:hidden" aria-hidden /> : null}
 
-      {isAdmin && adminMobileOpen ? (
+      {isAdmin ? (
         <button
           type="button"
-          className="fixed inset-0 z-[55] bg-black/45 backdrop-blur-[2px] transition-opacity lg:hidden print:hidden"
-          aria-label="Close menu"
+          className={cn(
+            'fixed inset-0 z-[55] lg:hidden print:hidden',
+            'bg-black/[0.42] backdrop-blur-[3px]',
+            'transition-[opacity,backdrop-filter] duration-300 ease-out motion-reduce:duration-150 motion-reduce:transition-opacity',
+            adminMobileOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
+          )}
+          aria-label="Close navigation menu"
+          aria-hidden={!adminMobileOpen}
+          tabIndex={-1}
           onClick={() => setAdminMobileOpen(false)}
         />
       ) : null}
 
       <aside
+        id={isAdmin ? 'admin-mobile-nav' : undefined}
         className={cn(
           'relative z-20 shrink-0 flex-col lg:h-full lg:min-h-0 lg:overflow-hidden',
           isTeacher &&
@@ -189,7 +233,8 @@ export function DashboardLayout() {
           isAdmin &&
             cn(
               'admin-nav-rail flex border-r border-[var(--admin-rail-border)] bg-[var(--admin-rail-surface-glass)] text-[var(--admin-rail-fg)] backdrop-blur-md',
-              'fixed inset-y-0 left-0 z-[60] w-[min(17.5rem,88vw)] max-lg:shadow-2xl max-lg:transition-transform max-lg:duration-200',
+              'fixed inset-y-0 left-0 z-[60] w-[min(17.5rem,88vw)] max-lg:shadow-[0_25px_50px_-12px_rgb(0_0_0/0.18)]',
+              'max-lg:transition-[transform,box-shadow] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:max-lg:transition-none motion-reduce:max-lg:duration-0',
               adminNavCollapsed ? 'lg:w-[4.75rem] lg:min-w-[4.75rem]' : 'lg:w-60 lg:min-w-60',
               !adminMobileOpen && 'max-lg:pointer-events-none max-lg:-translate-x-full',
               adminMobileOpen && 'max-lg:translate-x-0',
@@ -203,7 +248,10 @@ export function DashboardLayout() {
       >
         <div
           className={cn(
-            'flex shrink-0 items-center gap-2 border-b px-3 py-3 sm:px-4',
+            'flex shrink-0 border-b',
+            isAdmin && adminNavCollapsed
+              ? 'flex-col items-center gap-3 px-2 py-3'
+              : 'items-center gap-2 px-3 py-3 sm:px-4',
             isTeacher ? 'border-[var(--teacher-rail-border)]' : '',
             isAdmin ? 'border-[var(--admin-rail-border)]' : '',
             isParent ? 'border-[var(--parent-rail-border)]' : '',
@@ -226,36 +274,61 @@ export function DashboardLayout() {
               </div>
             </>
           ) : isAdmin ? (
-            <>
-              <img
-                src="/Tomhel_Logo-removebg-preview.png"
-                alt=""
-                width={40}
-                height={40}
-                className="h-10 w-10 shrink-0 object-contain"
-                decoding="async"
-              />
-              {!adminNavCollapsed ? (
+            adminNavCollapsed ? (
+              <>
+                <span className="sr-only">TAIM administrator</span>
+                <button
+                  type="button"
+                  onClick={toggleAdminNavCollapsed}
+                  title="Expand sidebar"
+                  className={cn(
+                    'admin-nav-well hidden h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl border-2 py-0 lg:flex',
+                    'border-[color-mix(in_oklch,var(--admin-rail-accent)_42%,var(--admin-rail-border))]',
+                    'bg-[color-mix(in_oklch,var(--color-background)_88%,var(--admin-rail-chip))]',
+                    'text-[var(--admin-rail-accent)] shadow-[0_2px_10px_-3px_rgb(0_0_0/0.18)]',
+                    'hover:bg-[var(--admin-rail-accent-soft)] hover:brightness-[1.02]',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-rail-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--admin-rail-surface)]',
+                    'motion-safe:transition-[background-color,box-shadow,transform] motion-safe:duration-200',
+                    'active:scale-[0.97] motion-reduce:active:scale-100',
+                  )}
+                  aria-label="Expand sidebar — show navigation labels"
+                >
+                  <ChevronsRight className="h-5 w-5 shrink-0" strokeWidth={2} aria-hidden />
+                </button>
+                <img
+                  src="/Tomhel_Logo-removebg-preview.png"
+                  alt=""
+                  width={36}
+                  height={36}
+                  className="h-9 w-9 shrink-0 object-contain"
+                  decoding="async"
+                />
+              </>
+            ) : (
+              <>
+                <img
+                  src="/Tomhel_Logo-removebg-preview.png"
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 shrink-0 object-contain"
+                  decoding="async"
+                />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--admin-rail-muted)]">TAIM</p>
                   <p className="truncate text-sm font-semibold tracking-tight text-[var(--admin-rail-fg)]">Control center</p>
                 </div>
-              ) : (
-                <span className="sr-only">TAIM administrator</span>
-              )}
-              <button
-                type="button"
-                onClick={toggleAdminNavCollapsed}
-                className="admin-nav-well ml-auto hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--admin-rail-border)] bg-[var(--admin-rail-chip)] text-[var(--admin-rail-fg)] hover:bg-[var(--admin-rail-chip-hover)] lg:flex"
-                aria-label={adminNavCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              >
-                {adminNavCollapsed ? (
-                  <ChevronRight className="h-4 w-4" strokeWidth={2} aria-hidden />
-                ) : (
+                <button
+                  type="button"
+                  onClick={toggleAdminNavCollapsed}
+                  title="Collapse sidebar"
+                  className="admin-nav-well ml-auto hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--admin-rail-border)] bg-[var(--admin-rail-chip)] text-[var(--admin-rail-fg)] hover:bg-[var(--admin-rail-chip-hover)] lg:flex"
+                  aria-label="Collapse sidebar"
+                >
                   <ChevronLeft className="h-4 w-4" strokeWidth={2} aria-hidden />
-                )}
-              </button>
-            </>
+                </button>
+              </>
+            )
           ) : isParent ? (
             <>
               <img
@@ -418,7 +491,8 @@ export function DashboardLayout() {
               contextLine={contextLine}
               roleLabel={roleTitle(role)}
               showMobileMenu
-              onOpenMobileNav={() => setAdminMobileOpen(true)}
+              mobileNavOpen={adminMobileOpen}
+              onToggleMobileNav={() => setAdminMobileOpen((o) => !o)}
               onSignOut={signOut}
             />
           </header>
@@ -428,24 +502,27 @@ export function DashboardLayout() {
               'teacher-header-blur teacher-top-header sticky top-0 z-30 shrink-0 border-b border-[var(--teacher-rail-border)] bg-[var(--teacher-rail-surface-glass)] text-[var(--teacher-rail-fg)] backdrop-blur-md print:hidden',
             )}
           >
-            <div className="flex h-14 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-              <div className="flex min-w-0 items-center gap-3 lg:hidden">
-                <img
-                  src="/Tomhel_Logo-removebg-preview.png"
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="h-10 w-10 shrink-0 object-contain"
-                  decoding="async"
-                />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-[var(--teacher-rail-fg)]">TAIM</p>
-                  <p className="truncate text-xs text-[var(--teacher-rail-muted)]">{roleTitle(role)}</p>
+            <div className="flex h-14 items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6 lg:px-8">
+              <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                <PortalBackButton rail="teacher" fallbackPath={PORTAL_TEACHER_HOME} className="shrink-0" />
+                <div className="flex min-w-0 items-center gap-3 lg:hidden">
+                  <img
+                    src="/Tomhel_Logo-removebg-preview.png"
+                    alt=""
+                    width={40}
+                    height={40}
+                    className="h-10 w-10 shrink-0 object-contain"
+                    decoding="async"
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-[var(--teacher-rail-fg)]">TAIM</p>
+                    <p className="truncate text-xs text-[var(--teacher-rail-muted)]">{roleTitle(role)}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="hidden min-w-0 flex-1 lg:block">
-                <p className="text-xs font-medium uppercase tracking-wide text-[var(--teacher-rail-muted)]">Current context</p>
-                <p className="truncate text-sm font-semibold text-[var(--teacher-rail-fg)]">{contextLine}</p>
+                <div className="hidden min-w-0 flex-1 lg:block">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[var(--teacher-rail-muted)]">Current context</p>
+                  <p className="truncate text-sm font-semibold text-[var(--teacher-rail-fg)]">{contextLine}</p>
+                </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <span className="hidden rounded-full border border-[var(--teacher-rail-border)] bg-[var(--teacher-rail-chip)] px-2.5 py-1 text-xs font-medium text-[var(--teacher-rail-muted)] sm:inline">
@@ -491,6 +568,7 @@ export function DashboardLayout() {
           <header className="parent-header-blur sticky top-0 z-30 flex flex-col gap-0 border-b border-[var(--parent-rail-border)] bg-[var(--parent-rail-surface-glass)] text-[var(--parent-rail-fg)] backdrop-blur-md print:hidden sm:px-5">
             <div className="flex items-center justify-between gap-3 px-4 py-2 sm:px-5">
               <div className="flex min-w-0 flex-1 items-center gap-2">
+                <PortalBackButton rail="parent" fallbackPath={PORTAL_DASHBOARD_HOME} className="shrink-0" />
                 <button
                   type="button"
                   onClick={() => navigate('/')}
@@ -549,17 +627,20 @@ export function DashboardLayout() {
           </header>
         ) : (
           <header className="z-10 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-card)]/90 backdrop-blur-md print:hidden">
-            <div className="flex h-14 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-              <div className="flex min-w-0 items-center gap-3 lg:hidden">
-                <SchoolLogoFigure variant="nav" className="shrink-0" />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-[var(--color-foreground)]">TAIM</p>
-                  <p className="truncate text-xs text-[var(--color-muted)]">{roleTitle(role)}</p>
+            <div className="flex h-14 items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6 lg:px-8">
+              <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                <PortalBackButton rail="default" fallbackPath={PORTAL_DASHBOARD_HOME} className="shrink-0" />
+                <div className="flex min-w-0 items-center gap-3 lg:hidden">
+                  <SchoolLogoFigure variant="nav" className="shrink-0" />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-[var(--color-foreground)]">TAIM</p>
+                    <p className="truncate text-xs text-[var(--color-muted)]">{roleTitle(role)}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="hidden min-w-0 flex-1 lg:block">
-                <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-muted)]">Current context</p>
-                <p className="truncate text-sm font-semibold text-[var(--color-foreground)]">{contextLine}</p>
+                <div className="hidden min-w-0 flex-1 lg:block">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-muted)]">Current context</p>
+                  <p className="truncate text-sm font-semibold text-[var(--color-foreground)]">{contextLine}</p>
+                </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <span className="hidden rounded-full border border-[var(--color-border)] bg-[var(--color-background)] px-2.5 py-1 text-xs font-medium text-[var(--color-muted)] sm:inline">

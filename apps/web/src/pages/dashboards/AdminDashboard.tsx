@@ -1,26 +1,51 @@
-import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { Building2, CalendarCheck, GraduationCap, School, UsersRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { AdminDashboardAlerts } from '@/components/admin/AdminDashboardAlerts';
+import { AdminDashboardCalendar } from '@/components/admin/AdminDashboardCalendar';
+import { AdminDashboardQuickActions } from '@/components/admin/AdminDashboardQuickActions';
+import { AdminTeacherWorkforceCard } from '@/components/admin/AdminTeacherWorkforceCard';
 import { AdminInsightCharts } from '@/components/admin/AdminInsightCharts';
 import { AdminMetricHero } from '@/components/admin/AdminMetricHero';
+import { AdminPerformanceSummary } from '@/components/admin/AdminPerformanceSummary';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
-import { localDateKey } from '@/lib/teacherLocalDate';
 import { isDevMockToken, SEED_DEMO } from '@/lib/skipRoleAuth';
+import { deriveAdminDashboardAlerts, useAdminSchoolSnapshot, type AdminDashboardAlertItem } from '@/hooks/useAdminSchoolSnapshot';
 import { useAuthStore } from '@/store/authStore';
 
 type School = { id: string; name: string; slug: string };
 
-type AttRow = { status?: string };
+const SUPER_ALERTS: AdminDashboardAlertItem[] = [
+  {
+    id: 's1',
+    title: 'Tenant provisioning',
+    detail: 'Verify DNS and SSO readiness before onboarding new schools.',
+    tone: 'info',
+  },
+  {
+    id: 's2',
+    title: 'Policy consistency',
+    detail: 'Align default grading scales across schools to reduce support load.',
+    tone: 'warning',
+  },
+  {
+    id: 's3',
+    title: 'Backup window',
+    detail: 'Nightly exports completed successfully for all active tenants.',
+    tone: 'success',
+  },
+];
 
 export function AdminDashboard() {
   const token = useAuthStore((s) => s.token);
   const role = useAuthStore((s) => s.role);
   const mock = isDevMockToken(token);
   const isSuper = role === 'SUPER_ADMIN';
-  const today = useMemo(() => localDateKey(), []);
+  const snapshot = useAdminSchoolSnapshot();
+  const schoolAlerts = useMemo(() => deriveAdminDashboardAlerts(snapshot), [snapshot]);
 
   const { data: school, isLoading: schoolLoading } = useQuery({
     queryKey: ['school', 'me'],
@@ -32,50 +57,15 @@ export function AdminDashboard() {
     queryFn: () => apiFetch<{ data: School[] }>('/api/v1/schools', { token }),
     enabled: !!token && role === 'SUPER_ADMIN' && !mock,
   });
-  const { data: students, isLoading: studentsLoading } = useQuery({
-    queryKey: ['students'],
-    queryFn: () => apiFetch<{ data: unknown[] }>('/api/v1/students', { token }),
-    enabled: !!token && role === 'ADMIN' && !mock,
-  });
-  const { data: classes, isLoading: classesLoading } = useQuery({
-    queryKey: ['classes', 'admin-dash'],
-    queryFn: () => apiFetch<{ data: unknown[] }>('/api/v1/classes', { token }),
-    enabled: !!token && role === 'ADMIN' && !mock,
-  });
-  const { data: teacherSubjects, isLoading: tsLoading } = useQuery({
-    queryKey: ['teacher-subjects', 'admin-dash'],
-    queryFn: () => apiFetch<{ data: { teacherId: string }[] }>('/api/v1/teacher-subjects', { token }),
-    enabled: !!token && role === 'ADMIN' && !mock,
-  });
-  const { data: attendanceToday, isLoading: attLoading } = useQuery({
-    queryKey: ['attendance', 'admin-dash', today],
-    queryFn: () => apiFetch<{ data: AttRow[] }>(`/api/v1/attendance?date=${encodeURIComponent(today)}`, { token }),
-    enabled: !!token && role === 'ADMIN' && !mock,
-  });
-
-  const studentCount = students?.data?.length ?? null;
-  const schoolCount = schools?.data?.length ?? null;
-  const classCount = classes?.data?.length ?? null;
-  const teacherCount = useMemo(() => {
-    const rows = teacherSubjects?.data;
-    if (!rows?.length) return null;
-    return new Set(rows.map((r) => r.teacherId)).size;
-  }, [teacherSubjects]);
-
-  const presentToday = useMemo(() => {
-    const rows = attendanceToday?.data;
-    if (!rows?.length) return null;
-    return rows.filter((r) => (r.status ?? 'PRESENT') === 'PRESENT').length;
-  }, [attendanceToday]);
 
   return (
-    <div className="space-y-8">
+    <div className="portal-page space-y-8">
       <PageHeader
         title="Dashboard"
         description={
           isSuper
             ? 'Platform-wide health — schools, tenants, and operational posture at a glance.'
-            : 'Operational snapshot for your school — enrolment, staffing, and today’s attendance pulse.'
+            : 'Central intelligence for your school — KPIs, alerts, and shortcuts stay in sync with every admin module.'
         }
       />
 
@@ -84,7 +74,7 @@ export function AdminDashboard() {
           <AdminMetricHero
             icon={Building2}
             label="Schools on platform"
-            value={schoolsLoading ? '…' : (schoolCount ?? 0)}
+            value={schoolsLoading ? '…' : (snapshot.schoolCount ?? 0)}
             hint="Active tenants"
             tone="indigo"
           />
@@ -92,7 +82,7 @@ export function AdminDashboard() {
           <AdminMetricHero
             icon={GraduationCap}
             label="Total students"
-            value={studentsLoading ? '…' : (studentCount ?? '—')}
+            value={snapshot.isLoading ? '…' : (snapshot.studentCount ?? '—')}
             hint="Enrolled learners"
             tone="indigo"
           />
@@ -109,7 +99,7 @@ export function AdminDashboard() {
           <AdminMetricHero
             icon={UsersRound}
             label="Total teachers"
-            value={tsLoading ? '…' : (teacherCount ?? '—')}
+            value={snapshot.isLoading ? '…' : (snapshot.teacherCount ?? '—')}
             hint="Unique staff with assignments"
             tone="indigo"
           />
@@ -126,8 +116,12 @@ export function AdminDashboard() {
           <AdminMetricHero
             icon={CalendarCheck}
             label="Attendance today"
-            value={attLoading ? '…' : (presentToday ?? '0')}
-            hint={`Present marks · ${today}`}
+            value={snapshot.isLoading ? '…' : (snapshot.presentToday ?? '0')}
+            hint={
+              snapshot.attendanceRatePct != null
+                ? `${snapshot.attendanceRatePct}% present · ${snapshot.today}`
+                : `Present marks · ${snapshot.today}`
+            }
             tone="success"
           />
         )}
@@ -143,14 +137,34 @@ export function AdminDashboard() {
           <AdminMetricHero
             icon={School}
             label="Active classes"
-            value={classesLoading ? '…' : (classCount ?? '—')}
+            value={snapshot.isLoading ? '…' : (snapshot.classCount ?? '—')}
             hint="Streams / cohorts"
             tone="indigo"
           />
         )}
       </div>
 
+      {!isSuper ? <AdminDashboardQuickActions /> : null}
+
+      {!isSuper && !mock ? <AdminTeacherWorkforceCard /> : null}
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <AdminDashboardAlerts items={isSuper ? SUPER_ALERTS : schoolAlerts} />
+        {!isSuper ? (
+          <AdminDashboardCalendar />
+        ) : (
+          <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)]/95 p-4 shadow-sm backdrop-blur-sm sm:p-5">
+            <h2 className="text-sm font-semibold text-[var(--color-foreground)]">Multi-school calendar</h2>
+            <p className="mt-2 text-sm text-[var(--color-muted)]">
+              Cross-tenant scheduling and term alignment views ship next. Use the schools list below for tenant context.
+            </p>
+          </section>
+        )}
+      </div>
+
       <AdminInsightCharts />
+
+      {!isSuper ? <AdminPerformanceSummary /> : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="rounded-2xl border-[var(--color-border)] shadow-[0_1px_2px_rgb(0_0_0/0.04),0_6px_20px_-4px_rgb(0_0_0/0.06)]">

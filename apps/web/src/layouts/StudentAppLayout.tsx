@@ -1,7 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
   CalendarDays,
-  ChevronLeft,
   Home,
   LogOut,
   Menu,
@@ -25,15 +24,15 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { useStudentMe } from '@/hooks/useStudentPortal';
 import { studentRouteMeta } from '@/lib/studentRouteMeta';
 import { bumpVisitStreak } from '@/lib/studentVisitStreak';
+import { PortalBackButton } from '@/components/layout/PortalBackButton';
 import { railSettingsHeadingClass, studentRailSettingsPillClass } from '@/components/layout/railSettingsPills';
+import { PORTAL_STUDENT_HOME } from '@/lib/portalRoutes';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
 import { triggerStudentHaptic, useStudentPrefsStore } from '@/store/studentPrefsStore';
 
 const railLink =
   'student-interactive-well group flex w-full flex-col items-center justify-center gap-0.5 rounded-xl py-2.5 text-[10px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-[var(--student-rail-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--student-rail-surface)] sm:flex-row sm:justify-start sm:gap-3 sm:px-3 sm:py-2.5 sm:text-left sm:text-sm';
-
-const STUDENT_HOME_PATH = '/app/student/home';
 
 export function StudentAppLayout() {
   const { pathname } = useLocation();
@@ -87,8 +86,6 @@ export function StudentAppLayout() {
   const route = studentRouteMeta(pathname);
   const fullName = me?.fullName ?? 'Student';
   const avatarUrl = me?.student?.passportPhotoUrl;
-  const showBack = pathname !== STUDENT_HOME_PATH;
-
   const studentHeaderIconBtn = cn(
     'student-interactive-well text-[var(--student-rail-fg)] hover:bg-[var(--student-rail-hover)] hover:text-[var(--student-rail-fg)]',
     'dark:hover:bg-[var(--student-rail-hover)] focus-visible:ring-[var(--student-rail-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--student-rail-surface)]',
@@ -296,20 +293,12 @@ export function StudentAppLayout() {
                   <Menu className="h-5 w-5" strokeWidth={2} aria-hidden />
                 )}
               </button>
-              {showBack ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerStudentHaptic('light');
-                    navigate(-1);
-                  }}
-                  className="student-interactive-well flex h-11 shrink-0 items-center gap-0.5 rounded-xl border border-[var(--student-rail-border)] bg-[var(--student-rail-chip)] px-2.5 text-sm font-semibold text-[var(--student-rail-fg)] hover:bg-[var(--student-rail-chip-hover)] sm:px-3"
-                  aria-label="Go back"
-                >
-                  <ChevronLeft className="h-5 w-5 shrink-0 text-[var(--student-rail-accent)]" strokeWidth={2.25} aria-hidden />
-                  <span className="hidden sm:inline">Back</span>
-                </button>
-              ) : null}
+              <PortalBackButton
+                rail="student"
+                fallbackPath={PORTAL_STUDENT_HOME}
+                beforeNavigate={() => triggerStudentHaptic('light')}
+                className="h-11 shrink-0"
+              />
               <div className="min-w-0">
                 <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-[var(--student-rail-muted)]">{route.label}</p>
               </div>
