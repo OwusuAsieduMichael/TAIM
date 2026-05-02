@@ -10,6 +10,8 @@
     "dev": "npm run dev --workspace=@taim/api",
     "dev:web": "npm run dev --workspace=@taim/web",
     "dev:api": "npm run dev --workspace=@taim/api",
+    "open:web": "powershell -NoProfile -Command \"Start-Process http://localhost:5173\"",
+    "open:api-docs": "powershell -NoProfile -Command \"Start-Process http://localhost:4000/api-docs\"",
     "build": "npm run build --workspaces --if-present",
     "db:generate": "npm run db:generate --workspace=@taim/api",
     "db:migrate": "npm run db:migrate --workspace=@taim/api",
