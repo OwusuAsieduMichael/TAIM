@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type TeacherToastTone = 'success' | 'error' | 'info';
+export type TeacherToastTone = 'success' | 'error' | 'info' | 'warning';
 
 export type TeacherToast = {
   id: string;

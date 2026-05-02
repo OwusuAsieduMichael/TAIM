@@ -8,7 +8,6 @@ import {
   School,
   ScrollText,
   Settings,
-  Users,
   UsersRound,
 } from 'lucide-react';
 

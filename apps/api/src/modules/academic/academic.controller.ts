@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import { pathParam } from '../../lib/pathParams.js';
 import type { AuthedRequest } from '../../middleware/auth.js';
 import * as svc from './academic.service.js';
 
@@ -13,6 +14,7 @@ export async function createYear(req: AuthedRequest, res: Response): Promise<voi
 }
 
 export async function createTerm(req: AuthedRequest, res: Response): Promise<void> {
-  const row = await svc.createTerm(req.auth!.schoolId!, req.params.yearId, req.body);
+  const yearId = pathParam(req.params.yearId, 'yearId');
+  const row = await svc.createTerm(req.auth!.schoolId!, yearId, req.body);
   res.status(201).json(row);
 }

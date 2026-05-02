@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: taim-api
+    runtime: node
+    plan: starter
+    rootDir: .
+    buildCommand: npm install && npm run db:generate --workspace=@taim/api && npm run build --workspace=@taim/api
+    startCommand: npm run start --workspace=@taim/api
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"

@@ -1,4 +1,4 @@
-import { ArrowRight, Award, BookOpen, CalendarDays, ChevronRight, IdCard, TrendingUp, UserRound } from 'lucide-react';
+import { ArrowRight, Award, BookOpen, CalendarDays, ChevronRight, IdCard, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { ScoreRing } from '@/components/student/ScoreRing';

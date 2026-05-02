@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import { pathParam } from '../../lib/pathParams.js';
 import type { AuthedRequest } from '../../middleware/auth.js';
 import * as svc from './student.service.js';
 
@@ -17,7 +18,8 @@ export async function create(req: AuthedRequest, res: Response): Promise<void> {
 
 export async function update(req: AuthedRequest, res: Response): Promise<void> {
   const schoolId = req.auth!.schoolId!;
-  const row = await svc.updateStudent(schoolId, req.params.id, req.body);
+  const id = pathParam(req.params.id, 'id');
+  const row = await svc.updateStudent(schoolId, id, req.body);
   res.json(row);
 }
 
@@ -25,6 +27,7 @@ export async function resetPin(req: AuthedRequest, res: Response): Promise<void>
   const schoolId = req.auth!.schoolId!;
   const body = req.body as { pin?: string };
   const ip = req.ip;
-  const result = await svc.resetStudentPin(schoolId, req.auth!.sub, req.params.id, body.pin, ip);
+  const id = pathParam(req.params.id, 'id');
+  const result = await svc.resetStudentPin(schoolId, req.auth!.sub, id, body.pin, ip);
   res.json(result);
 }

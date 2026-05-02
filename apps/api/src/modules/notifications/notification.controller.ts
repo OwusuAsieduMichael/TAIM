@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import { pathParam } from '../../lib/pathParams.js';
 import type { AuthedRequest } from '../../middleware/auth.js';
 import { HttpError } from '../../middleware/errorHandler.js';
 import * as svc from './notification.service.js';
@@ -13,6 +14,7 @@ export async function list(req: AuthedRequest, res: Response): Promise<void> {
 }
 
 export async function read(req: AuthedRequest, res: Response): Promise<void> {
-  await svc.markRead(req.auth!.sub, req.params.id);
+  const id = pathParam(req.params.id, 'id');
+  await svc.markRead(req.auth!.sub, id);
   res.status(204).send();
 }

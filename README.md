@@ -87,3 +87,63 @@ School slug for OTP and student login: `demo-school`.
 | `npm run dev:api`| Start API in watch mode  |
 | `npm run dev:web`| Start Vite dev server    |
 | `npm run build`  | Build all workspaces     |
+
+## Deployment (Vercel + Render + Supabase)
+
+This repo is a monorepo with two deployables:
+
+- `apps/web` → **Vercel** (static site + SPA routing via `vercel.json`)
+- `apps/api` → **Render** (Node web service; see `render.yaml`)
+- Database → **Supabase Postgres** (set both `DATABASE_URL` and `DIRECT_URL` exactly like `apps/api/.env.example`)
+
+### 1) Supabase
+
+Create a Supabase project and copy:
+
+- **Transaction pooler** URI → `DATABASE_URL` (for the running API)
+- **Direct** URI (or Supavisor session pooler `:5432` if you need IPv4) → `DIRECT_URL` (for Prisma migrations)
+
+### 2) Render (API)
+
+Create a **Web Service** from this GitHub repo.
+
+Recommended settings:
+
+- **Root directory**: repository root (`.`)
+- **Build command**: `npm install && npm run db:generate --workspace=@taim/api && npm run build --workspace=@taim/api`
+- **Start command**: `npm run start --workspace=@taim/api`
+- **Health check path**: `/health`
+
+Environment variables (minimum):
+
+- `NODE_ENV=production`
+- `PORT` (Render usually injects this automatically; the API reads it)
+- `DATABASE_URL`
+- `DIRECT_URL`
+- `JWT_SECRET` (32+ chars)
+- `CORS_ORIGIN` (comma-separated list; include your Vercel domain, e.g. `https://your-app.vercel.app`)
+
+Optional but recommended for reliable installs on Node hosts:
+
+- `NPM_CONFIG_PRODUCTION=false` (ensures devDependencies like `typescript`/`prisma` are available during `npm install` on some hosts)
+
+Database migrations:
+
+- Run `prisma migrate deploy` against production using your `DIRECT_URL` (often easiest from your laptop with `DATABASE_URL`/`DIRECT_URL` temporarily pointed at prod, or via a one-off Render shell job).
+
+### 3) Vercel (Web)
+
+Create a Vercel project from this GitHub repo and set:
+
+- **Root directory**: `apps/web`
+- **Build command**: `npm install && npm run build`
+- **Output directory**: `dist`
+
+Environment variables:
+
+- `VITE_API_URL=https://<your-render-service>.onrender.com` (no trailing slash)
+
+Notes:
+
+- In local dev, omit `VITE_API_URL` so the browser uses `/api` and Vite proxies to `http://localhost:4000`.
+- In production, `VITE_API_URL` must be the full origin of your Render API because there is no Vite proxy in a static deployment.

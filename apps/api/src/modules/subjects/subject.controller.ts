@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import { pathParam } from '../../lib/pathParams.js';
 import type { AuthedRequest } from '../../middleware/auth.js';
 import * as svc from './subject.service.js';
 
@@ -13,6 +14,7 @@ export async function create(req: AuthedRequest, res: Response): Promise<void> {
 }
 
 export async function update(req: AuthedRequest, res: Response): Promise<void> {
-  const row = await svc.updateSubject(req.auth!.schoolId!, req.params.id, req.body);
+  const id = pathParam(req.params.id, 'id');
+  const row = await svc.updateSubject(req.auth!.schoolId!, id, req.body);
   res.json(row);
 }

@@ -1,10 +1,12 @@
-import { CheckCircle2, Info, X, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Info, X, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTeacherToastStore } from '@/store/teacherToastStore';
+import type { TeacherToastTone } from '@/store/teacherToastStore';
 
-function toneIcon(tone: 'success' | 'error' | 'info') {
+function toneIcon(tone: TeacherToastTone) {
   if (tone === 'success') return <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />;
   if (tone === 'error') return <XCircle className="h-4 w-4 shrink-0 text-red-600" strokeWidth={2} />;
+  if (tone === 'warning') return <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" strokeWidth={2} />;
   return <Info className="h-4 w-4 shrink-0 text-sky-600" strokeWidth={2} />;
 }
 
@@ -28,6 +30,7 @@ export function TeacherToastViewport() {
             'border-[var(--color-border)] bg-[var(--color-card)]/95 backdrop-blur-md',
             t.tone === 'success' && 'ring-1 ring-emerald-600/15',
             t.tone === 'error' && 'ring-1 ring-red-600/15',
+            t.tone === 'warning' && 'ring-1 ring-amber-600/15',
             t.tone === 'info' && 'ring-1 ring-sky-600/15',
           )}
         >

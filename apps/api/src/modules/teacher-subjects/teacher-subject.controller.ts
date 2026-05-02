@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import { pathParam } from '../../lib/pathParams.js';
 import type { AuthedRequest } from '../../middleware/auth.js';
 import * as svc from './teacher-subject.service.js';
 
@@ -13,6 +14,7 @@ export async function create(req: AuthedRequest, res: Response): Promise<void> {
 }
 
 export async function remove(req: AuthedRequest, res: Response): Promise<void> {
-  await svc.remove(req.auth!.schoolId!, req.params.id);
+  const id = pathParam(req.params.id, 'id');
+  await svc.remove(req.auth!.schoolId!, id);
   res.status(204).send();
 }
