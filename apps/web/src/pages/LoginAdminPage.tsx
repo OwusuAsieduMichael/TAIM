@@ -51,8 +51,7 @@ export function LoginAdminPage() {
       title="Administrator sign-in"
       description="Use your school admin email and password issued by Tomhel."
     >
-      <DemoQuickLoginPanel role="ADMIN" />
-      <DemoQuickLoginPanel role="SUPER_ADMIN" />
+      <DemoQuickLoginPanel roles={['ADMIN', 'SUPER_ADMIN']} />
       <form className="mt-6 space-y-4 border-t border-[var(--color-border)]/80 pt-6" onSubmit={form.handleSubmit(onSubmit)}>
         {SHOW_DEMO_QUICK_LOGIN ? (
           <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-muted)]">Or sign in manually</p>

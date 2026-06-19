@@ -15,35 +15,35 @@ const portals: {
   title: string;
   desc: string;
   icon: typeof Shield;
-  demoRole: DemoRole;
+  demoRoles: DemoRole[];
 }[] = [
   {
     to: '/login/admin',
     title: 'Administrator',
     desc: 'School dashboard, users, and configuration.',
     icon: Shield,
-    demoRole: 'ADMIN',
+    demoRoles: ['ADMIN', 'SUPER_ADMIN'],
   },
   {
     to: '/login/teacher',
     title: 'Teacher',
     desc: 'Classes, attendance, and grades.',
     icon: Users,
-    demoRole: 'TEACHER',
+    demoRoles: ['TEACHER'],
   },
   {
     to: '/login/parent',
     title: 'Parent',
     desc: 'View your child’s progress and school updates.',
     icon: UserRound,
-    demoRole: 'PARENT',
+    demoRoles: ['PARENT'],
   },
   {
     to: '/login/student',
     title: 'Student',
     desc: 'Your results, attendance, and profile.',
     icon: GraduationCap,
-    demoRole: 'STUDENT',
+    demoRoles: ['STUDENT'],
   },
 ];
 
@@ -96,19 +96,39 @@ export function HomePage() {
                   <li
                     key={p.to}
                     className={cn(
-                      'flex h-full flex-col rounded-xl border border-white/50 bg-white/80 p-5 shadow-sm backdrop-blur-md',
-                      'dark:border-white/10 dark:bg-neutral-950/55',
+                      'flex h-full flex-col rounded-xl border p-5 shadow-sm backdrop-blur-md',
+                      SHOW_DEMO_QUICK_LOGIN
+                        ? 'border-emerald-700/35 bg-emerald-50/88 dark:border-emerald-600/30 dark:bg-emerald-950/50'
+                        : 'border-white/50 bg-white/80 dark:border-white/10 dark:bg-neutral-950/55',
                     )}
                   >
-                    <Icon className="h-7 w-7 text-slate-800 dark:text-neutral-100" strokeWidth={1.75} />
+                    <Icon
+                      className={cn(
+                        'h-7 w-7',
+                        SHOW_DEMO_QUICK_LOGIN ? 'text-emerald-800 dark:text-emerald-100' : 'text-slate-800 dark:text-neutral-100',
+                      )}
+                      strokeWidth={1.75}
+                    />
                     <span className="mt-4 text-lg font-semibold" style={{ color: forest }}>
                       {p.title}
                     </span>
-                    <span className="mt-2 flex-1 text-sm leading-relaxed text-slate-700 dark:text-neutral-300">{p.desc}</span>
-                    <DemoQuickLoginPanel role={p.demoRole} compact />
+                    <span
+                      className={cn(
+                        'mt-2 flex-1 text-sm leading-relaxed',
+                        SHOW_DEMO_QUICK_LOGIN ? 'text-emerald-950/80 dark:text-emerald-50/85' : 'text-slate-700 dark:text-neutral-300',
+                      )}
+                    >
+                      {p.desc}
+                    </span>
+                    <DemoQuickLoginPanel roles={p.demoRoles} compact />
                     <Link
                       to={p.to}
-                      className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-slate-600 underline-offset-2 hover:underline dark:text-neutral-400"
+                      className={cn(
+                        'mt-3 inline-flex items-center gap-1 text-sm font-medium underline-offset-2 hover:underline',
+                        SHOW_DEMO_QUICK_LOGIN
+                          ? 'text-emerald-800/80 dark:text-emerald-200/80'
+                          : 'text-slate-600 dark:text-neutral-400',
+                      )}
                     >
                       Manual sign-in
                       <ChevronRight className="h-4 w-4" strokeWidth={2} />
