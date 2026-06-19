@@ -8,7 +8,9 @@ Monorepo layout:
 ## Prerequisites
 
 - Node.js 20+
-- A [Supabase](https://supabase.com) project (Postgres), or local PostgreSQL for development
+- **Backend (pick one):**
+  - **Free:** [Google Apps Script](https://script.google.com) + Google Sheets — see **[apps/gas/README.md](apps/gas/README.md)** (no Supabase/Render required)
+  - **Production-scale:** A [Supabase](https://supabase.com) project (Postgres), or local PostgreSQL for development
 
 ## Extended features (teacher workforce and report cards)
 
