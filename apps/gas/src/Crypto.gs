@@ -83,3 +83,25 @@ function normalizePhone_(phone) {
   }
   return digits;
 }
+
+function findSchoolUserByPhoneAndRole_(schoolId, phone, role) {
+  var normalized = normalizePhone_(phone);
+  return findOne_('Users', function (u) {
+    return (
+      u.schoolId === schoolId &&
+      u.role === role &&
+      u.status === 'ACTIVE' &&
+      normalizePhone_(u.phone) === normalized
+    );
+  });
+}
+
+function findDemoSchoolUser_(schoolId, phone, role) {
+  var user = findSchoolUserByPhoneAndRole_(schoolId, phone, role);
+  if (user) {
+    return user;
+  }
+  return findOne_('Users', function (u) {
+    return u.schoolId === schoolId && u.role === role && u.status === 'ACTIVE';
+  });
+}

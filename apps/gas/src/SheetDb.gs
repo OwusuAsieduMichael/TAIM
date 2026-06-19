@@ -21,7 +21,11 @@ function rows_(name) {
   for (var i = 1; i < data.length; i++) {
     var row = {};
     for (var c = 0; c < headers.length; c++) {
-      row[headers[c]] = data[i][c] === '' ? null : data[i][c];
+      var raw = data[i][c] === '' ? null : data[i][c];
+      if (headers[c] === 'phone' && raw !== null) {
+        raw = String(raw);
+      }
+      row[headers[c]] = raw;
     }
     if (row.id) {
       out.push(row);

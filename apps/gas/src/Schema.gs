@@ -114,5 +114,9 @@ function initSheets_(ss) {
       sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
       sheet.setFrozenRows(1);
     }
+    var phoneCol = headers.indexOf('phone');
+    if (phoneCol >= 0) {
+      sheet.getRange(2, phoneCol + 1, Math.max(sheet.getMaxRows(), 2), 1).setNumberFormat('@');
+    }
   });
 }

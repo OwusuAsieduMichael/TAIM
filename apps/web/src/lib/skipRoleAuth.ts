@@ -25,8 +25,8 @@ export const SEED_DEMO = {
   adminPassword: 'Admin123!',
   superAdminEmail: 'super@taim.local',
   superAdminPassword: 'Admin123!',
-  teacherPhone: '233241000001',
-  parentPhone: '233241000002',
+  teacherPhone: '0241000001',
+  parentPhone: '0241000002',
   studentAdmission: 'STU-001',
   studentPin: '1234',
 } as const;

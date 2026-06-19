@@ -5,7 +5,8 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { RoleLoginShell } from '@/components/auth/RoleLoginShell';
-import { DemoQuickLoginPanel } from '@/components/auth/DemoQuickLoginPanel';
+import { AuthFormDivider } from '@/components/auth/AuthFormDivider';
+import { PortalQuickSignIn } from '@/components/auth/PortalQuickSignIn';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,11 +59,9 @@ export function LoginStudentPage() {
           : 'Use your school code, student ID, and PIN. Keep your PIN private — never share it with anyone.'
       }
     >
-      <DemoQuickLoginPanel role="STUDENT" />
-      <form className="mt-6 space-y-4 border-t border-[var(--color-border)]/80 pt-6" onSubmit={form.handleSubmit(onSubmit)} noValidate>
-        {SHOW_DEMO_QUICK_LOGIN ? (
-          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-muted)]">Or sign in manually</p>
-        ) : null}
+      <PortalQuickSignIn role="STUDENT" />
+      <form className="mt-6 space-y-4" onSubmit={form.handleSubmit(onSubmit)} noValidate>
+        {SHOW_DEMO_QUICK_LOGIN ? <AuthFormDivider /> : null}
         {SKIP_ROLE_AUTH ? (
           <p className="rounded-lg border border-[var(--color-border)] bg-[var(--color-muted)]/10 px-3 py-2 text-xs leading-relaxed text-[var(--color-muted)]">
             Seed student: school <span className="font-mono text-[var(--color-foreground)]">{SEED_DEMO.schoolSlug}</span>, ID{' '}

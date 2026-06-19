@@ -23,7 +23,7 @@ export function RoleLoginShell({ title, description, children }: Props) {
             <p className="mt-6 text-center text-sm text-[var(--color-muted)]">
               <Link
                 to="/"
-                className="font-medium text-[var(--color-foreground)] underline decoration-[var(--color-border)] underline-offset-4 transition-colors hover:decoration-[var(--color-primary)]"
+                className="font-medium text-[var(--color-foreground)] underline decoration-[var(--color-border)] underline-offset-4 transition-colors hover:text-[oklch(0.38_0.11_155)] hover:decoration-[oklch(0.38_0.11_155)]"
               >
                 ← All portals
               </Link>

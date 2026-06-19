@@ -2,12 +2,14 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-const buttonVariants = cva(
+export const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         default: 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:opacity-90',
+        school:
+          'bg-[oklch(0.38_0.12_155)] text-white hover:bg-[oklch(0.34_0.12_155)] dark:bg-[oklch(0.45_0.12_155)] dark:hover:bg-[oklch(0.40_0.12_155)]',
         outline: 'border border-[var(--color-border)] bg-[var(--color-card)] hover:bg-[var(--color-background)]',
         ghost: 'hover:bg-black/5',
       },

@@ -34,7 +34,7 @@ function seedDemoData_() {
   insert_('Users', {
     id: 'seed-teacher',
     schoolId: 'seed-school',
-    phone: '233241000001',
+    phone: '0241000001',
     fullName: 'Demo Teacher',
     role: 'TEACHER',
     status: 'ACTIVE',
@@ -43,7 +43,7 @@ function seedDemoData_() {
   insert_('Users', {
     id: 'seed-parent',
     schoolId: 'seed-school',
-    phone: '233241000002',
+    phone: '0241000002',
     fullName: 'Demo Parent',
     role: 'PARENT',
     status: 'ACTIVE',

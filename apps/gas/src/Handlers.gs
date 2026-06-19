@@ -25,9 +25,7 @@ function authOtpRequest_(body, role) {
     throw httpError_(404, 'School not found');
   }
   var phone = normalizePhone_(body.phone);
-  var user = findOne_('Users', function (u) {
-    return u.schoolId === school.id && u.phone === phone && u.role === role && u.status === 'ACTIVE';
-  });
+  var user = findSchoolUserByPhoneAndRole_(school.id, phone, role);
   if (!user) {
     throw httpError_(404, 'No account for this phone and role');
   }
@@ -55,9 +53,7 @@ function authOtpVerify_(body, role) {
   }
   var phone = normalizePhone_(body.phone);
   if (String(body.code) === CONFIG.DEMO_OTP_CODE) {
-    var demoUser = findOne_('Users', function (u) {
-      return u.schoolId === school.id && u.phone === phone && u.role === role && u.status === 'ACTIVE';
-    });
+    var demoUser = findDemoSchoolUser_(school.id, phone, role);
     if (demoUser) {
       return tokenResponse_(demoUser);
     }
@@ -86,9 +82,7 @@ function authOtpVerify_(body, role) {
     throw httpError_(401, 'Invalid OTP');
   }
   updateById_('OtpCodes', otp.id, { consumedAt: new Date().toISOString() });
-  var user = findOne_('Users', function (u) {
-    return u.schoolId === school.id && u.phone === phone && u.role === role;
-  });
+  var user = findSchoolUserByPhoneAndRole_(school.id, phone, role);
   if (!user) {
     throw httpError_(404, 'User not found');
   }
