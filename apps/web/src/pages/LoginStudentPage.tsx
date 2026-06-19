@@ -5,11 +5,12 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { RoleLoginShell } from '@/components/auth/RoleLoginShell';
+import { DemoQuickLoginPanel } from '@/components/auth/DemoQuickLoginPanel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { loginStudent } from '@/features/auth/api';
-import { devPreviewSignIn, SEED_DEMO, SKIP_ROLE_AUTH } from '@/lib/skipRoleAuth';
+import { devPreviewSignIn, SEED_DEMO, SHOW_DEMO_QUICK_LOGIN, SKIP_ROLE_AUTH } from '@/lib/skipRoleAuth';
 import { useAuthStore } from '@/store/authStore';
 const schema = z.object({
   schoolSlug: z.string().min(1),
@@ -29,7 +30,7 @@ export function LoginStudentPage() {
     defaultValues: {
       schoolSlug: SEED_DEMO.schoolSlug,
       admissionNumber: SEED_DEMO.studentAdmission,
-      ...(SKIP_ROLE_AUTH ? { pin: SEED_DEMO.studentPin } : {}),
+      pin: SEED_DEMO.studentPin,
     },
   });
 
@@ -57,7 +58,11 @@ export function LoginStudentPage() {
           : 'Use your school code, student ID, and PIN. Keep your PIN private — never share it with anyone.'
       }
     >
-      <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)} noValidate>
+      <DemoQuickLoginPanel role="STUDENT" />
+      <form className="mt-6 space-y-4 border-t border-[var(--color-border)]/80 pt-6" onSubmit={form.handleSubmit(onSubmit)} noValidate>
+        {SHOW_DEMO_QUICK_LOGIN ? (
+          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-muted)]">Or sign in manually</p>
+        ) : null}
         {SKIP_ROLE_AUTH ? (
           <p className="rounded-lg border border-[var(--color-border)] bg-[var(--color-muted)]/10 px-3 py-2 text-xs leading-relaxed text-[var(--color-muted)]">
             Seed student: school <span className="font-mono text-[var(--color-foreground)]">{SEED_DEMO.schoolSlug}</span>, ID{' '}
@@ -128,12 +133,6 @@ export function LoginStudentPage() {
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Signing in…' : 'Sign in'}
         </Button>
-
-        <p className="border-t border-[var(--color-border)]/80 pt-4 text-center text-xs text-[var(--color-muted)]">
-          Demo: school <span className="font-mono text-[var(--color-foreground)]">demo-school</span>, ID{' '}
-          <span className="font-mono text-[var(--color-foreground)]">STU-001</span>, PIN{' '}
-          <span className="font-mono text-[var(--color-foreground)]">1234</span>
-        </p>
       </form>
     </RoleLoginShell>
   );

@@ -4,11 +4,12 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { RoleLoginShell } from '@/components/auth/RoleLoginShell';
+import { DemoQuickLoginPanel } from '@/components/auth/DemoQuickLoginPanel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { requestTeacherOtp, verifyTeacherOtp } from '@/features/auth/api';
-import { devPreviewSignIn, SEED_DEMO, SKIP_ROLE_AUTH } from '@/lib/skipRoleAuth';
+import { devPreviewSignIn, SEED_DEMO, SHOW_DEMO_QUICK_LOGIN, SKIP_ROLE_AUTH } from '@/lib/skipRoleAuth';
 import { useAuthStore } from '@/store/authStore';
 
 const schema = z.object({
@@ -28,7 +29,7 @@ export function LoginTeacherPage() {
     resolver: zodResolver(schema),
     defaultValues: {
       schoolSlug: SEED_DEMO.schoolSlug,
-      ...(SKIP_ROLE_AUTH ? { phone: SEED_DEMO.teacherPhone } : {}),
+      phone: SEED_DEMO.teacherPhone,
     },
   });
 
@@ -78,7 +79,11 @@ export function LoginTeacherPage() {
             : 'Enter the 6-digit code we sent to your phone. In development, check the API server logs for the code.'
       }
     >
-      <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+      <DemoQuickLoginPanel role="TEACHER" />
+      <form className="mt-6 space-y-4 border-t border-[var(--color-border)]/80 pt-6" onSubmit={form.handleSubmit(onSubmit)}>
+        {SHOW_DEMO_QUICK_LOGIN ? (
+          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-muted)]">Or sign in manually</p>
+        ) : null}
         {SKIP_ROLE_AUTH ? (
           <p className="rounded-lg border border-[var(--color-border)] bg-[var(--color-muted)]/10 px-3 py-2 text-xs leading-relaxed text-[var(--color-muted)]">
             Seed teacher phone: <span className="font-mono text-[var(--color-foreground)]">{SEED_DEMO.teacherPhone}</span>{' '}

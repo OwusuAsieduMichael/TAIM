@@ -1,6 +1,8 @@
 import { ChevronRight, GraduationCap, Shield, UserRound, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { SKIP_ROLE_AUTH } from '@/lib/skipRoleAuth';
+import { DemoQuickLoginPanel } from '@/components/auth/DemoQuickLoginPanel';
+import type { DemoRole } from '@/features/auth/demoQuickLogin';
+import { SHOW_DEMO_QUICK_LOGIN } from '@/lib/skipRoleAuth';
 import { cn } from '@/lib/utils';
 import { SchoolLogoFigure } from '@/components/SchoolLogoFigure';
 import { SCHOOL_HERO_IMAGE } from '@/lib/schoolBrand';
@@ -8,32 +10,42 @@ import { SCHOOL_HERO_IMAGE } from '@/lib/schoolBrand';
 const forest = 'oklch(0.38 0.11 155)';
 const brandRedText = 'oklch(0.38 0.17 25)';
 
-const portals = [
+const portals: {
+  to: string;
+  title: string;
+  desc: string;
+  icon: typeof Shield;
+  demoRole: DemoRole;
+}[] = [
   {
     to: '/login/admin',
     title: 'Administrator',
-    desc: 'School dashboard, users, and configuration. Sign in with email and password.',
+    desc: 'School dashboard, users, and configuration.',
     icon: Shield,
+    demoRole: 'ADMIN',
   },
   {
     to: '/login/teacher',
     title: 'Teacher',
-    desc: 'Classes, attendance, and grades. Sign in with your phone number (OTP).',
+    desc: 'Classes, attendance, and grades.',
     icon: Users,
+    demoRole: 'TEACHER',
   },
   {
     to: '/login/parent',
     title: 'Parent',
-    desc: 'View your child’s progress and school updates. Sign in with phone (OTP).',
+    desc: 'View your child’s progress and school updates.',
     icon: UserRound,
+    demoRole: 'PARENT',
   },
   {
     to: '/login/student',
     title: 'Student',
-    desc: 'Your results, attendance, and profile. Sign in with school code, student ID, and PIN.',
+    desc: 'Your results, attendance, and profile.',
     icon: GraduationCap,
+    demoRole: 'STUDENT',
   },
-] as const;
+];
 
 export function HomePage() {
   return (
@@ -56,15 +68,10 @@ export function HomePage() {
               Tomhel Academic Information Manager
             </h1>
             <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-slate-700 dark:text-neutral-300">
-              Select your role to open the correct sign-in page. Each portal uses the credentials your school issued for that role.
+              {SHOW_DEMO_QUICK_LOGIN
+                ? 'Tap a demo account below to enter instantly, or open a portal for manual sign-in.'
+                : 'Select your role to open the correct sign-in page. Each portal uses the credentials your school issued for that role.'}
             </p>
-            {SKIP_ROLE_AUTH ? (
-              <p className="mx-auto mt-4 max-w-sm rounded-lg border border-amber-700/25 bg-amber-50/90 px-3 py-2 text-left text-xs leading-relaxed text-amber-950 dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-100">
-                Development: each login screen is prefilled with seeded demo accounts from the API seed. Sign in there
-                skips the server so you can work on layouts. Set{' '}
-                <span className="font-mono">VITE_USE_REAL_ROLE_AUTH=true</span> to exercise real authentication.
-              </p>
-            ) : null}
             <p className="mx-auto mt-8 max-w-sm text-xs text-slate-600 dark:text-neutral-400">
               Need the mobile app?{' '}
               <span className="font-semibold underline decoration-2 underline-offset-2" style={{ color: forest }}>
@@ -86,25 +93,25 @@ export function HomePage() {
               {portals.map((p) => {
                 const Icon = p.icon;
                 return (
-                  <li key={p.to}>
+                  <li
+                    key={p.to}
+                    className={cn(
+                      'flex h-full flex-col rounded-xl border border-white/50 bg-white/80 p-5 shadow-sm backdrop-blur-md',
+                      'dark:border-white/10 dark:bg-neutral-950/55',
+                    )}
+                  >
+                    <Icon className="h-7 w-7 text-slate-800 dark:text-neutral-100" strokeWidth={1.75} />
+                    <span className="mt-4 text-lg font-semibold" style={{ color: forest }}>
+                      {p.title}
+                    </span>
+                    <span className="mt-2 flex-1 text-sm leading-relaxed text-slate-700 dark:text-neutral-300">{p.desc}</span>
+                    <DemoQuickLoginPanel role={p.demoRole} compact />
                     <Link
                       to={p.to}
-                      className={cn(
-                        'group flex h-full flex-col rounded-xl border border-white/50 bg-white/80 p-5 shadow-sm backdrop-blur-md transition-colors',
-                        'hover:border-emerald-700/30 hover:bg-white/95',
-                        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700',
-                        'dark:border-white/10 dark:bg-neutral-950/55 dark:hover:border-emerald-500/35 dark:hover:bg-neutral-950/75',
-                      )}
+                      className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-slate-600 underline-offset-2 hover:underline dark:text-neutral-400"
                     >
-                      <Icon className="h-7 w-7 text-slate-800 dark:text-neutral-100" strokeWidth={1.75} />
-                      <span className="mt-4 text-lg font-semibold" style={{ color: forest }}>
-                        {p.title}
-                      </span>
-                      <span className="mt-2 flex-1 text-sm leading-relaxed text-slate-700 dark:text-neutral-300">{p.desc}</span>
-                      <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-slate-900 dark:text-neutral-100">
-                        Continue
-                        <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
-                      </span>
+                      Manual sign-in
+                      <ChevronRight className="h-4 w-4" strokeWidth={2} />
                     </Link>
                   </li>
                 );

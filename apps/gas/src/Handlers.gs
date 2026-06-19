@@ -54,6 +54,14 @@ function authOtpVerify_(body, role) {
     throw httpError_(404, 'School not found');
   }
   var phone = normalizePhone_(body.phone);
+  if (String(body.code) === CONFIG.DEMO_OTP_CODE) {
+    var demoUser = findOne_('Users', function (u) {
+      return u.schoolId === school.id && u.phone === phone && u.role === role && u.status === 'ACTIVE';
+    });
+    if (demoUser) {
+      return tokenResponse_(demoUser);
+    }
+  }
   var otps = findAll_('OtpCodes', function (o) {
     return (
       o.schoolId === school.id &&

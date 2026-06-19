@@ -10,6 +10,9 @@ export const DEV_MOCK_ACCESS_TOKEN = '__TAIM_DEV_UI_PREVIEW__';
 export const SKIP_ROLE_AUTH =
   import.meta.env.DEV && import.meta.env.VITE_USE_REAL_ROLE_AUTH !== 'true';
 
+/** Show demo credentials + one-tap sign-in (default on; set VITE_DEMO_LOGIN=false to hide). */
+export const SHOW_DEMO_QUICK_LOGIN = import.meta.env.VITE_DEMO_LOGIN !== 'false';
+
 export function isDevMockToken(token: string | null | undefined): boolean {
   return token === DEV_MOCK_ACCESS_TOKEN;
 }

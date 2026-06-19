@@ -3,6 +3,8 @@ var CONFIG = {
   OTP_EXPIRY_MINUTES: 5,
   MAX_OTP_ATTEMPTS: 5,
   TEACHER_WORKFORCE_DISABLED: true,
+  /** Demo quick login: accept this OTP for teacher/parent without SMS. */
+  DEMO_OTP_CODE: '000000',
 };
 
 function getJwtSecret_() {
