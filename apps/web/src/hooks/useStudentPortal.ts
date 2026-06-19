@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchMe } from '@/features/auth/api';
 import { apiFetch } from '@/lib/api';
-import { isDevMockToken } from '@/lib/skipRoleAuth';
+import { MOCK_STUDENT_ME, MOCK_STUDENT_RESULTS } from '@/lib/presentationMockData';
+import { isPreviewSession } from '@/lib/skipRoleAuth';
 import { useAuthStore } from '@/store/authStore';
 
 export type StudentResultApi = {
@@ -17,20 +18,23 @@ export type StudentResultApi = {
 
 export function useStudentMe() {
   const token = useAuthStore((s) => s.token);
-  const mock = isDevMockToken(token);
+  const preview = isPreviewSession(token);
   return useQuery({
-    queryKey: ['auth', 'me'],
-    queryFn: () => fetchMe(token!),
-    enabled: !!token && !mock,
+    queryKey: ['auth', 'me', preview ? 'preview' : 'live'],
+    queryFn: () => (preview ? Promise.resolve(MOCK_STUDENT_ME) : fetchMe(token!)),
+    enabled: !!token,
   });
 }
 
 export function useStudentResults() {
   const token = useAuthStore((s) => s.token);
-  const mock = isDevMockToken(token);
+  const preview = isPreviewSession(token);
   return useQuery({
-    queryKey: ['results', 'student', 'portal'],
-    queryFn: () => apiFetch<{ data: StudentResultApi[] }>('/api/v1/results?published=true', { token }),
-    enabled: !!token && !mock,
+    queryKey: ['results', 'student', 'portal', preview ? 'preview' : 'live'],
+    queryFn: () =>
+      preview
+        ? Promise.resolve({ data: MOCK_STUDENT_RESULTS })
+        : apiFetch<{ data: StudentResultApi[] }>('/api/v1/results?published=true', { token }),
+    enabled: !!token,
   });
 }

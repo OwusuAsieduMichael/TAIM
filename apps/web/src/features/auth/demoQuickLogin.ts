@@ -1,6 +1,6 @@
 import type { NavigateFunction } from 'react-router-dom';
 import { loginAdmin, loginStudent, verifyParentOtp, verifyTeacherOtp } from '@/features/auth/api';
-import { devPreviewSignIn, SEED_DEMO, SKIP_ROLE_AUTH, type DevPreviewRole } from '@/lib/skipRoleAuth';
+import { devPreviewSignIn, PRESENTATION_MODE, SEED_DEMO, SKIP_ROLE_AUTH, type DevPreviewRole } from '@/lib/skipRoleAuth';
 
 /** Fixed demo OTP accepted by the GAS backend for teacher/parent quick sign-in. */
 export const DEMO_OTP_CODE = '000000';
@@ -32,7 +32,7 @@ export async function demoQuickSignIn(
   setAuth: (token: string, role: string, schoolSlug?: string | null) => void,
   navigate: NavigateFunction,
 ): Promise<void> {
-  if (SKIP_ROLE_AUTH) {
+  if (SKIP_ROLE_AUTH || PRESENTATION_MODE) {
     devPreviewSignIn(
       setAuth,
       navigate,

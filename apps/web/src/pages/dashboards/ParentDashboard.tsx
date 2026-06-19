@@ -4,8 +4,10 @@ import { PageHeader } from '@/components/dashboard/PageHeader';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api';
+import type { ParentResultRow } from '@/lib/presentationMockData';
+import { MOCK_PARENT_NOTIFICATIONS, MOCK_PARENT_RESULTS } from '@/lib/presentationMockData';
 import { cn } from '@/lib/utils';
-import { isDevMockToken } from '@/lib/skipRoleAuth';
+import { isPreviewSession } from '@/lib/skipRoleAuth';
 import { useAuthStore } from '@/store/authStore';
 
 type Notification = {
@@ -26,19 +28,29 @@ function formatDate(iso: string) {
 
 export function ParentDashboard() {
   const token = useAuthStore((s) => s.token);
-  const mock = isDevMockToken(token);
+  const preview = isPreviewSession(token);
   const { data, isLoading: notifLoading } = useQuery({
-    queryKey: ['notifications'],
-    queryFn: () => apiFetch<{ data: Notification[] }>('/api/v1/notifications', { token }),
-    enabled: !!token && !mock,
+    queryKey: ['notifications', preview ? 'preview' : 'live'],
+    queryFn: () =>
+      preview
+        ? Promise.resolve({ data: MOCK_PARENT_NOTIFICATIONS })
+        : apiFetch<{ data: Notification[] }>('/api/v1/notifications', { token }),
+    enabled: !!token,
   });
   const { data: results, isLoading: resultsLoading } = useQuery({
-    queryKey: ['results', 'parent'],
-    queryFn: () => apiFetch<{ data: { subject: { name: string }; grade: number; remark: string }[] }>(
-      '/api/v1/results?published=true',
-      { token },
-    ),
-    enabled: !!token && !mock,
+    queryKey: ['results', 'parent', preview ? 'preview' : 'live'],
+    queryFn: async (): Promise<{ data: ParentResultRow[] }> => {
+      if (preview) return { data: MOCK_PARENT_RESULTS };
+      const res = await apiFetch<{ data: ParentResultRow[] }>('/api/v1/results?published=true', { token });
+      return {
+        data: res.data.map((r) => ({
+          subject: { name: r.subject?.name ?? 'Subject' },
+          grade: r.grade,
+          remark: r.remark,
+        })),
+      };
+    },
+    enabled: !!token,
   });
 
   const list = data?.data ?? [];
@@ -126,7 +138,7 @@ export function ParentDashboard() {
                 key={i}
                 className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] px-4 py-3"
               >
-                <span className="font-medium text-[var(--color-foreground)]">{r.subject.name}</span>
+                <span className="font-medium text-[var(--color-foreground)]">{r.subject?.name ?? 'Subject'}</span>
                 <span className="tabular-nums text-sm text-[var(--color-muted)]">
                   Grade <span className="font-semibold text-[var(--color-foreground)]">{r.grade}</span>
                   <span className="text-[var(--color-muted)]"> · </span>

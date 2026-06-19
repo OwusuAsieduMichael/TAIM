@@ -507,6 +507,27 @@ function resultsList_(auth, route) {
     if (query.termId && r.termId !== query.termId) return false;
     if (query.published === 'true' && String(r.published) !== 'true' && r.published !== true) return false;
     return true;
+  }).map(function (r) {
+    var subject = findOne_('Subjects', function (s) {
+      return s.id === r.subjectId;
+    });
+    var term = findOne_('Terms', function (t) {
+      return t.id === r.termId;
+    });
+    return {
+      id: r.id,
+      studentId: r.studentId,
+      subjectId: r.subjectId,
+      termId: r.termId,
+      caScore: Number(r.caScore),
+      examScore: Number(r.examScore),
+      finalScore: Number(r.finalScore),
+      grade: r.grade,
+      remark: r.remark,
+      published: r.published,
+      subject: { name: subject ? subject.name : 'Subject', code: subject ? subject.code : null },
+      term: term ? { name: term.name } : null,
+    };
   });
   return { data: data };
 }
@@ -563,11 +584,24 @@ function notificationsMarkRead_(auth, route) {
 // --- Workforce stubs ---
 
 function workforceStatus_(auth) {
+  var now = new Date().toISOString();
+  var tz = 'Africa/Accra';
+  var disabled = CONFIG.TEACHER_WORKFORCE_DISABLED;
   return {
-    disabled: CONFIG.TEACHER_WORKFORCE_DISABLED,
-    signedIn: true,
-    signedOut: true,
-    localDate: Utilities.formatDate(new Date(), 'GMT', 'yyyy-MM-dd'),
+    serverNow: now,
+    schoolTimezone: tz,
+    localDate: Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd'),
+    punctualityMinutes: 15,
+    workforceDisabled: disabled,
+    morningIssuedAt: disabled ? now : null,
+    signedInAt: disabled ? now : null,
+    signInLate: false,
+    eveningIssuedAt: null,
+    eveningDeadlineAt: null,
+    signedOutAt: null,
+    signOutLate: false,
+    forcedLogoutAt: null,
+    canOperate: true,
   };
 }
 

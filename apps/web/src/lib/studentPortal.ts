@@ -12,11 +12,15 @@ export function firstNameFromFull(fullName: string): string {
 }
 
 export type ResultScoreRow = {
-  subject: { name: string };
+  subject?: { name?: string };
   finalScore: number;
   grade: number;
   remark: string;
 };
+
+function subjectLabel(row: ResultScoreRow): string {
+  return row.subject?.name?.trim() || 'Subject';
+}
 
 export function performanceInsights(rows: ResultScoreRow[]): {
   best?: { subject: string; score: number };
@@ -32,9 +36,9 @@ export function performanceInsights(rows: ResultScoreRow[]): {
   }
   const sum = rows.reduce((a, r) => a + r.finalScore, 0);
   const weak =
-    lowest.finalScore < 70 ? { subject: lowest.subject.name, score: lowest.finalScore } : undefined;
+    lowest.finalScore < 70 ? { subject: subjectLabel(lowest), score: lowest.finalScore } : undefined;
   return {
-    best: { subject: best.subject.name, score: best.finalScore },
+    best: { subject: subjectLabel(best), score: best.finalScore },
     weak,
     average: Math.round((sum / rows.length) * 10) / 10,
   };

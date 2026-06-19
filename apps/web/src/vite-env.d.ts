@@ -8,6 +8,8 @@ interface ImportMetaEnv {
   readonly VITE_USE_REAL_ROLE_AUTH?: string;
   /** Set to `"false"` to hide demo credentials and one-tap sign-in. */
   readonly VITE_DEMO_LOGIN?: string;
+  /** Set to `"false"` to use live GAS auth instead of presentation preview data. */
+  readonly VITE_PRESENTATION_MODE?: string;
 }
 
 interface ImportMeta {

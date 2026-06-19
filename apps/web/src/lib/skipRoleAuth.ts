@@ -13,8 +13,19 @@ export const SKIP_ROLE_AUTH =
 /** Show demo credentials + one-tap sign-in (default on; set VITE_DEMO_LOGIN=false to hide). */
 export const SHOW_DEMO_QUICK_LOGIN = import.meta.env.VITE_DEMO_LOGIN !== 'false';
 
+/**
+ * Presentation / demo mode: one-tap portal access uses rich UI preview data (no live API gates).
+ * Default on; set VITE_PRESENTATION_MODE=false for real GAS sign-in against the backend.
+ */
+export const PRESENTATION_MODE = import.meta.env.VITE_PRESENTATION_MODE !== 'false';
+
 export function isDevMockToken(token: string | null | undefined): boolean {
   return token === DEV_MOCK_ACCESS_TOKEN;
+}
+
+/** True when the app should use built-in preview data instead of live API calls. */
+export function isPreviewSession(token: string | null | undefined): boolean {
+  return isDevMockToken(token);
 }
 
 /** Matches `apps/api/prisma/seed.ts` demo users (for labels and defaults). */

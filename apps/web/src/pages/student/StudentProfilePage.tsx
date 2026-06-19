@@ -17,38 +17,9 @@ import { SchoolLogoFigure } from '@/components/SchoolLogoFigure';
 import { Button } from '@/components/ui/button';
 import type { MeResponse } from '@/features/auth/api';
 import { useStudentMe } from '@/hooks/useStudentPortal';
-import { isDevMockToken, SEED_DEMO } from '@/lib/skipRoleAuth';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
 import { triggerStudentHaptic } from '@/store/studentPrefsStore';
-
-const MOCK_STUDENT_ME: MeResponse = {
-  id: 'seed-student-user',
-  fullName: 'Demo Student',
-  role: 'STUDENT',
-  schoolId: 'seed-school',
-  email: null,
-  phone: null,
-  accountStatus: 'ACTIVE',
-  lastActivityAt: new Date().toISOString(),
-  student: {
-    id: 'seed-student',
-    admissionNumber: 'STU-001',
-    classId: 'seed-class',
-    schoolName: SEED_DEMO.schoolDisplayName,
-    schoolSlug: SEED_DEMO.schoolSlug,
-    className: 'JHS1-A',
-    classLevel: 'JHS1',
-    passportPhotoUrl: null,
-    firstName: 'Demo',
-    lastName: 'Student',
-    gender: 'Male',
-    dateOfBirth: '2012-03-15',
-    academicYearName: '2025/2026',
-    currentTermName: 'Term 1',
-    guardians: [{ name: 'Demo Parent', phone: '233241000002', relation: 'Mother' }],
-  },
-};
 
 function formatDob(iso: string | null | undefined): string {
   if (!iso) return '—';
@@ -159,10 +130,7 @@ function ReadRow({
 export function StudentProfilePage() {
   const navigate = useNavigate();
   const clear = useAuthStore((s) => s.clear);
-  const token = useAuthStore((s) => s.token);
-  const mock = isDevMockToken(token);
-  const { data: meApi, isLoading } = useStudentMe();
-  const me = mock ? MOCK_STUDENT_ME : meApi;
+  const { data: me, isLoading } = useStudentMe();
   const st = me?.student;
 
   const [copied, setCopied] = useState(false);
@@ -196,7 +164,7 @@ export function StudentProfilePage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 pb-28 pt-2 sm:max-w-xl sm:px-6 lg:max-w-3xl lg:px-8 lg:pt-4">
-      {isLoading && !mock ? (
+      {isLoading && !me ? (
         <div className="space-y-5 pt-4">
           <div className="h-48 animate-pulse rounded-3xl bg-black/[0.06] dark:bg-white/[0.08]" />
           <div className="h-40 animate-pulse rounded-2xl bg-black/[0.06] dark:bg-white/[0.08]" />
